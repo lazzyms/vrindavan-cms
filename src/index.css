@@ -3,3 +3,11 @@
 @tailwind components;
 
 @tailwind utilities;
+
+.form-control {
+  @apply block w-full border-0 p-0 text-gray-900 placeholder-gray-500;
+}
+
+.form-control:focus {
+  @apply ring-0;
+}
