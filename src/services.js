@@ -72,6 +72,19 @@ export const getCategoryDetails = (id) => {
   });
 };
 
+export const deleteCategory = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`categories/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
 export const addOrUpdateCategories = (data) => {
   return new Promise((resolve, reject) => {
     instance
@@ -88,6 +101,32 @@ export const addOrUpdateCategories = (data) => {
 export const getProductsByCategoryId = (id) => {
   return new Promise((resolve, reject) => {
     instance
+      .get(`categories/products/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+}
+
+export const addOrUpdateProduct = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`products`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getProductsById = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
       .get(`products/${id}`)
       .then((res) => {
         resolve(res);
@@ -98,6 +137,19 @@ export const getProductsByCategoryId = (id) => {
   });
 }
 
+export const deleteProduct = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`products/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
 export const uploadToCloudinary = (data) => {
   return new Promise((resolve, reject) => {
     fetch(
@@ -105,6 +157,26 @@ export const uploadToCloudinary = (data) => {
       {
         method: 'POST',
         body: data
+      }
+    )
+      .then((r) => {
+        resolve(r.json());
+      })
+      .catch((err) => {
+        console.log('Cloudinary error', err);
+        reject(err);
+      });
+  });
+};
+
+export const removeFromCloudinary = (public_id) => {
+  return new Promise((resolve, reject) => {
+    fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_NAME}/image/destroy`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ public_id }),
+        headers: { 'Content-Type': 'application/json' }
       }
     )
       .then((r) => {

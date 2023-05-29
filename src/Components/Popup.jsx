@@ -9,8 +9,8 @@ export default function Popup({ heading, content, open, setOpen }) {
       <Dialog as='div' className='relative z-10' onClose={setOpen}>
         <div className='fixed inset-0' />
 
-        <div className='fixed inset-0 overflow-hidden'>
-          <div className='absolute inset-0 overflow-hidden'>
+        <div className='fixed inset-0 overflow-auto'>
+          <div className='absolute inset-0 overflow-auto'>
             <div className='pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10'>
               <Transition.Child
                 as={Fragment}
@@ -42,7 +42,7 @@ export default function Popup({ heading, content, open, setOpen }) {
                           </div>
                         </div>
                       </div>
-                      <div className='relative mt-6 flex-1 px-4 sm:px-6'>
+                      <div className='relative mt-6 flex-1 px-4 sm:px-6 overflow-auto'>
                         {content}
                         
                       </div>

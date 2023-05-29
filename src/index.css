@@ -4,6 +4,18 @@
 
 @tailwind utilities;
 
+.price-input {
+  border: 1px !important;
+}
+
+.text-input {
+  @apply flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300;
+}
+
+.disable-text-input {
+  @apply flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200;
+}
+
 .form-control {
   @apply block w-full border-0 p-0 text-gray-900 placeholder-gray-500;
 }

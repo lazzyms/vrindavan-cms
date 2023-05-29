@@ -1,32 +1,33 @@
-import { Switch } from '@headlessui/react';
-import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { EyeIcon, PlusIcon } from '@heroicons/react/solid';
+import { PencilIcon } from '@heroicons/react/outline';
+import { EyeIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid';
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import ConfirmDialouge from '../../Components/ConfirmDialouge';
+import ErrorBoundary from '../../Components/ErrorBoundry';
 import Popup from '../../Components/Popup';
-import { getCategoryDetails, getProductsByCategoryId } from '../../services';
+import {
+  deleteCategory,
+  deleteProduct,
+  getCategoryDetails,
+  getProductsByCategoryId,
+} from '../../services';
+import Product from './Product';
+import Breadcrumb from '../../Components/Breadcrumbs';
 
-export default function AllCategories() {
+export default function Category() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
   const [categoryDetails, setCategoryDetails] = useState();
-  const [formState, setFormState] = useState(false);
+  const [insertForm, setInsertForm] = useState(false);
   const [products, setProducts] = useState([]);
-  useEffect(() => {
-    getCategoryDetails(id)
-      .then((res) => {
-        setCategoryLoading(false);
-        if (res.data.success) {
-          setCategoryDetails(res.data.data);
-        }
-      })
-      .catch((err) => {
-        setCategoryLoading(false);
-        console.log(err);
-      });
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [prodDeleteModal, setProdDeleteModal] = useState(false);
+  const [pages, setPages] = useState([]);
+
+  const getFreshCategories = () => {
     getProductsByCategoryId(id)
       .then((res) => {
         setProductsLoading(false);
@@ -38,13 +39,61 @@ export default function AllCategories() {
         setProductsLoading(false);
         console.log(err);
       });
+  }
+
+  useEffect(() => {
+    getCategoryDetails(id)
+      .then((res) => {
+        setCategoryLoading(false);
+        if (res.data.success) {
+          setCategoryDetails(res.data.data);
+          setPages([
+            {
+              name: 'All Categories',
+              href: '/categories',
+              current: false
+            },
+            {
+              name: res.data.data.name,
+              href: `/categories/${res.data.data._id}`,
+              current: true
+            }
+          ])
+        }
+      })
+      .catch((err) => {
+        setCategoryLoading(false);
+        console.log(err);
+      });
+    getFreshCategories();
   }, [id]);
 
+  useEffect(() => {
+    if (!insertForm) {
+      getFreshCategories()
+    }
+  }, [insertForm])
+
+  const onDelete = (id) => {
+    deleteCategory(id).then((res) => {
+      setDeleteModal(false);
+      navigate('/categories')
+    });
+  };
+
+  const removeProduct = (pid) => {
+    deleteProduct(pid).then((res) => {
+      setProdDeleteModal(false);
+      getFreshCategories()
+    });
+  }
+
   return (
-    <div className='divide-y space-y-4'>
-      <div>
+    <div className=''>
+      <Breadcrumb pages={pages} />
+      <div className='border-b pb-2'>
         {categoryLoading ? (
-          <div className='animate-pulse m-3 font-bold '>
+          <div className='animate-pulse m-3 font-bold'>
             <div className=''>
               <div className='mx-auto px-4 sm:px-6 lg:px-8 lg:flex lg:items-center lg:justify-between'>
                 <h2 className='bg-gray-400 h-12 w-80 rounded sm:text-4xl'>
@@ -68,48 +117,61 @@ export default function AllCategories() {
             </div>
           </div>
         ) : (
-          <div className=''>
-            <div className='mx-auto px-4 sm:px-6 lg:px-8 lg:flex lg:items-center lg:justify-between'>
+          <div className='lg:flex lg:items-between lg:justify-between'>
+            <div className='inline-flex'>
+              <p className='my-auto text-base text-gray-500'>
+                {categoryDetails.description.replaceAll('"', '')}
+              </p>
+            </div>
+            <div className='inline-flex'>
               <div className='inline-flex'>
-                <h2 className='text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl'>
-                  <span className='block'>{categoryDetails.name}</span>
-                </h2>
-                <div className='ml-3 inline-flex'>
-                  <Link
-                    to={`/categories/edit/${categoryDetails._id}`}
-                    className='inline-flex items-center justify-center p-3 text-gray-900 font-medium rounded-full border hover:shadow'
-                  >
-                    <PencilIcon className='h-4 w-4' />
-                  </Link>
-                </div>
-                <div className='ml-3 inline-flex'>
-                  <button
-                    type='button'
-                    className='inline-flex items-center justify-center p-3 text-red-500 font-medium rounded-full border hover:shadow'
-                  >
-                    <TrashIcon className='h-4 w-4' />
-                  </button>
-                </div>
+                <Link
+                  to={`/categories/edit/${categoryDetails._id}`}
+                  className='inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
+                >
+                  Edit Category
+                </Link>
               </div>
+              {categoryDetails.subCategories.length === 0 && (
+                <>
+                  <div className='ml-3 inline-flex'>
+                    <button
+                      type='button'
+                      className='inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
+                      onClick={() => setInsertForm(true)}
+                    >
+                      <PlusIcon className='h-4 w-4' />
+                      <span>Add Product</span>
+                    </button>
+                    <Popup
+                      heading='Add Product'
+                      open={insertForm}
+                      setOpen={setInsertForm}
+                      content={<Product categoryId={id} categoryName={categoryDetails.name} handlePopup={setInsertForm} />}
+                    />
+                  </div>
 
-              <div className='mt-8 flex lg:mt-0 lg:flex-shrink-0'>
-                <div className='ml-3 inline-flex'>
-                  <button
-                    type='button'
-                    className='inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
-                    onClick={() => setFormState(true)}
-                  >
-                    <PlusIcon className='h-4 w-4' />
-                    <span>Add Product</span>
-                  </button>
-                  <Popup
-                    heading='Add Product'
-                    open={formState}
-                    setOpen={setFormState}
-                    content={<AddProduct />}
-                  />
-                </div>
-              </div>
+                  <div className='ml-3 inline-flex'>
+                    <button
+                      type='button'
+                      className='text-red-500 inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
+                      onClick={() => setDeleteModal(true)}
+                    >
+                      Delete Category
+                    </button>
+                    <ErrorBoundary>
+                      <ConfirmDialouge
+                        id={id}
+                        open={deleteModal}
+                        setOpen={(e) => setDeleteModal(e)}
+                        message='Warning: You are about to erase the category and all its contents. This is a permanent action and cannot be reversed. Please confirm if you want to proceed.'
+                        title={`Delete ${categoryDetails.name}`}
+                        handleAction={(e) => onDelete(e)}
+                      />
+                    </ErrorBoundary>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -164,279 +226,65 @@ export default function AllCategories() {
               <div className='m-1 bg-gray-400 h-3 w-60 rounded'></div>
             </div>
           </div>
-        ) : products.length === 0 ? (
-          <div className='m-3 font-bold '>
-            <div className='h-full rounded'>
-              <div className='m-1 rounded'>No products added in category</div>
-            </div>
-          </div>
         ) : (
-          <div className='grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4'></div>
+          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+            {products.map((product, i) => (
+              <div key={product._id} className='pt-4'>
+                <div className='flow-root rounded-lg bg-gray-50 shadow-md h-full'>
+                  <div className='mx-4'>
+                    <img
+                      src={product.productImages[0]}
+                      className='mt-1 w-full h-36 rounded-xl contain'
+                      alt={product._id}
+                    />
+                    <div className='flex items-center justify-between'>
+                      <h3 className='mt-1 text-lg font-medium tracking-tight text-gray-900'>
+                        {product.name}
+                      </h3>
+                      <h3 className='mt-1 text-lg font-medium tracking-tight text-gray-800'>
+                        ₹{product.price}
+                      </h3>
+                    </div>
+                    {product.description.replaceAll('"', '') ? <p className='mt-1 h-8 text-base text-gray-600'>
+                      {product.description.replaceAll('"', '')}
+                    </p> : <p className='mt-1 h-8 text-base text-gray-400'>
+                      No description provided
+                    </p>}
+
+                  </div>
+                  <div className="isolate inline-flex rounded-md w-full border-t">
+                    <Link
+                      className='relative inline-flex items-center justify-center hover:shadow-md rounded-l-md px-2 py-2 text-sm font-semibold w-1/2 border-r'
+                      to={`/products/${product._id}`}
+                    >
+                      <EyeIcon className='h-6 w-6 text-gray-700' />
+                      <span className="px-2 text-gray-700">Edit</span>
+                    </Link>
+                    <button
+                      className='relative -ml-px inline-flex items-center justify-center hover:shadow-md rounded-r-md px-2 py-2 text-sm font-semibold w-1/2 border-l'
+                      onClick={() => setProdDeleteModal(true)}
+                    >
+                      <TrashIcon className='h-6 w-6 text-red-400' />
+                      <span className="px-2 text-red-400">Delete</span>
+                    </button>
+                  </div>
+                  <ErrorBoundary>
+                    <ConfirmDialouge
+                      id={product._id}
+                      open={prodDeleteModal}
+                      setOpen={(e) => setProdDeleteModal(e)}
+                      message='Warning: You are about to remove the product and all its contents. This is a permanent action and cannot be reversed. Please confirm if you want to proceed.'
+                      title={`Delete ${product.name}`}
+                      handleAction={(e) => removeProduct(e)}
+                    />
+                  </ErrorBoundary>
+                </div>
+              </div>))}
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
 
-const AddProduct = (productDetail = {}) => {
-  const [colors, setColors] = useState([]);
-  const [enabled, setEnabled] = useState(false);
-  const [images, setImages] = useState([]);
-  const [range, setRange] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors }
-  } = useForm();
-
-  const onSubmit = (data) => {
-    console.log(data);
-  };
-
-  const handleImageUpdate = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setImages(URL.createObjectURL(e.target.files));
-    }
-  };
-
-  const handleChangeColor = (e, i) => {
-    const newColors = [...colors];
-    newColors[i] = e.target.value;
-    setColors(newColors);
-  };
-
-  const addNewColor = () => {
-    setColors([...colors, '']);
-  };
-
-  return (
-    <form
-      className='space-y-8 divide-y divide-gray-200'
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <div className='space-y-8 divide-y divide-gray-200 sm:space-y-5'>
-        <div>
-          {productDetail.id && (
-            <input
-              type='hidden'
-              name='id'
-              {...register('id')}
-              value={productDetail.id}
-            />
-          )}
-          <div className='mt-6 sm:mt-5 space-y-6 sm:space-y-5'>
-            <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-              <label
-                htmlFor='username'
-                className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-              >
-                Name
-              </label>
-              <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                <div className='max-w-lg flex rounded-md shadow-sm'>
-                  <input
-                    type='text'
-                    name='name'
-                    id='name'
-                    autoComplete='name'
-                    defaultValue={productDetail.name}
-                    className='flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300'
-                    {...register('name', {
-                      required: true
-                    })}
-                    placeholder='Enter name of Product Category, e.g. Sofa'
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-              <label
-                htmlFor='about'
-                className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-              >
-                Description
-              </label>
-              <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                <textarea
-                  id='description'
-                  name='description'
-                  rows={3}
-                  defaultValue={productDetail.description}
-                  className='max-w-lg shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md'
-                  placeholder='Enter a description of the category'
-                  {...register('description')}
-                />
-              </div>
-            </div>
-
-            <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5'>
-              <label
-                htmlFor='photo'
-                className='block text-sm font-medium text-gray-700'
-              >
-                Color options
-              </label>
-              <div className='mt-1 sm:mt-0 sm:col-span-2 flex item-center'>
-                {colors.map((color, index) => (
-                  <input
-                    type='color'
-                    value={color}
-                    className='m-1'
-                    onChange={(e) => handleChangeColor(e, index)}
-                  />
-                ))}
-                <button
-                  className='bg-white mx-1 py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none'
-                  onClick={() => addNewColor()}
-                >
-                  Add Color
-                </button>
-              </div>
-            </div>
-
-            <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-              <label
-                htmlFor='cover-photo'
-                className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-              >
-                Product Images
-              </label>
-              <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                <div className='flex items-center'>
-                  <label
-                    htmlFor='productImages'
-                    className='bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none'
-                  >
-                    <span>Upload Images</span>
-                    <input
-                      id='productImages'
-                      name='productImages'
-                      type='file'
-                      accept='image/*'
-                      multiple
-                      className='sr-only'
-                      {...register('productImages', {
-                        onChange: (e) => handleImageUpdate(e)
-                      })}
-                    />
-                  </label>
-                  {images && images.length > 0 && (
-                    <div className='flex-1'>
-                      {images.map((image) => (
-                        <img
-                          key={image}
-                          src={image}
-                          alt={image}
-                          className='m-2 w-32 h-16 object-contain'
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-              <label
-                htmlFor='country'
-                className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-              >
-                Price Range?
-              </label>
-              <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                <Switch
-                  checked={range}
-                  className={classNames(
-                    enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                    'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-                  )}
-                  onChange={() => setRange(!range)}
-                >
-                  <span
-                    aria-hidden='true'
-                    className={classNames(
-                      enabled ? 'translate-x-5' : 'translate-x-0',
-                      'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200'
-                    )}
-                  />
-                </Switch>
-              </div>
-            </div>
-            <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-              <label
-                htmlFor='country'
-                className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-              >
-                Visible
-              </label>
-              <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                <Controller
-                  name='isVisible'
-                  control={control}
-                  rules={{ onChange: setEnabled, value: enabled }}
-                  checked={enabled}
-                  render={({ field }) => (
-                    <Switch
-                      {...field}
-                      checked={enabled}
-                      className={classNames(
-                        enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                        'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
-                      )}
-                    >
-                      <span
-                        aria-hidden='true'
-                        className={classNames(
-                          enabled ? 'translate-x-5' : 'translate-x-0',
-                          'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200'
-                        )}
-                      />
-                    </Switch>
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className='pt-5'>
-        <div className='flex justify-end'>
-          <button
-            type='submit'
-            className={classNames(
-              loading ? 'cursor-not-allowed animate-pulse' : '',
-              'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none'
-            )}
-          >
-            Save
-            {loading && (
-              <span className='ml-1'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-6 w-6'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'
-                  />
-                </svg>
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
-    </form>
-  );
-};

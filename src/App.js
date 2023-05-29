@@ -8,6 +8,7 @@ import {
   CategoryForm,
   AllCategories
 } from './Pages';
+import Product from './Pages/Categories/Product';
 
 const routes = [
   {
@@ -28,17 +29,22 @@ const routes = [
   {
     path: '/categories/new',
     exact: true,
-    component: <Layout view={<CategoryForm />} heading='Categories' />
+    component: <Layout view={<CategoryForm />} />
   },
   {
     path: '/categories/edit/:id',
     exact: true,
-    component: <Layout view={<CategoryForm />} heading='Categories' />
+    component: <Layout view={<CategoryForm />} />
   },
   {
     path: '/categories',
     exact: true,
-    component: <Layout view={<AllCategories />} heading='Categories' />
+    component: <Layout view={<AllCategories />} />
+  },
+  {
+    path: '/products/:pid',
+    exact: true,
+    component: <Layout view={<Product />} />
   },
 ];
 
