@@ -35,7 +35,12 @@ export default function AllCategories() {
     return <div className='animate-pulse m-3 font-bold '>Loading...</div>;
   }
   if (parentCategories.length === 0) {
-    return <div className='m-3 font-bold '>No Categories</div>;
+    return <><div className='m-3 font-bold '>No Categories</div><div className='-mt-6 flex justify-end items-center'>
+      <Link
+        to={`/categories/new`}
+        className='inline-flex justify-center items-center px-2 border border-gray-300 rounded-md text-gray-700 bg-transparent hover:bg-gray-200 hover:border-gray-200'
+      >Add New Category<PlusCircleIcon className='border-l border-gray-300 ml-1 pl-1 h-6 w-6' /></Link>
+    </div></>;
   }
   return (
     <>
