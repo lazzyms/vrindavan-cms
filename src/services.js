@@ -150,6 +150,45 @@ export const deleteProduct = (id) => {
   });
 };
 
+export const searchProductsByName = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`product/searchByName`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const updateBulkDiscount = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`updateDiscounts`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const updateBulkPriceByPercentage = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`updatePrice`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
 export const uploadToCloudinary = (data) => {
   return new Promise((resolve, reject) => {
     fetch(

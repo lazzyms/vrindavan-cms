@@ -3,18 +3,18 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './Layout';
 import {
   Category,
-  Dashboard,
   Login,
   CategoryForm,
   AllCategories
 } from './Pages';
 import Product from './Pages/Categories/Product';
+import BulkChange from './Pages/Categories/BulkChange';
 
 const routes = [
   {
     path: '/',
     exact: true,
-    component: <Layout view={<Dashboard />} heading='Dashboard' />
+    component: <Layout view={<AllCategories />} />
   },
   {
     path: '/login',
@@ -37,15 +37,15 @@ const routes = [
     component: <Layout view={<CategoryForm />} />
   },
   {
-    path: '/categories',
-    exact: true,
-    component: <Layout view={<AllCategories />} />
-  },
-  {
     path: '/products/:pid',
     exact: true,
     component: <Layout view={<Product />} />
   },
+  {
+    path: '/products/discount',
+    exact: true,
+    component: <Layout view={<BulkChange />} />
+  }
 ];
 
 function App() {

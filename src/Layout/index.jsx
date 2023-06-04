@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 /* This example requires Tailwind CSS v2.0+ */
@@ -7,7 +8,7 @@ import { Helmet } from 'react-helmet';
 import Invert from '../Assets/Invert.png';
 
 import {
-  FolderIcon,
+  AdjustmentsIcon,
   HomeIcon,
   LogoutIcon,
   MenuIcon,
@@ -36,30 +37,17 @@ export default function Layout({ view, heading }) {
 
   const navigation = [
     {
-      name: 'Dashboard',
+      name: 'Categories',
       href: '/',
       icon: HomeIcon,
       current: location.pathname === '/'
     },
-    {
-      name: 'Categories',
-      children: [
-        {
-          name: 'All Categories',
-          href: '/categories',
-          current: location.pathname === '/categories'
-        },
-        {
-          name: 'Create New',
-          href: '/categories/new',
-          current: location.pathname === '/categories/new'
-        }
-      ],
-      icon: FolderIcon,
-      current:
-        location.pathname === '/categories' ||
-        location.pathname === '/categories/new'
-    }
+    // {
+    //   name: 'Bulk Price change',
+    //   href: '/products/discount',
+    //   icon: AdjustmentsIcon,
+    //   current: location.pathname === '/products/discount'
+    // }
   ];
   useEffect(() => {
     if (!localStorage.getItem('token')) {

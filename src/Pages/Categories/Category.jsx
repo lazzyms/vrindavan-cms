@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { PencilIcon } from '@heroicons/react/outline';
 import { EyeIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid';
 import React, { useState } from 'react';
@@ -14,6 +15,7 @@ import {
 } from '../../services';
 import Product from './Product';
 import Breadcrumb from '../../Components/Breadcrumbs';
+import { getImageUrl } from '../../utils';
 
 export default function Category() {
   const { id } = useParams();
@@ -49,8 +51,8 @@ export default function Category() {
           setCategoryDetails(res.data.data);
           setPages([
             {
-              name: 'All Categories',
-              href: '/categories',
+              name: 'Categories',
+              href: '/',
               current: false
             },
             {
@@ -77,7 +79,7 @@ export default function Category() {
   const onDelete = (id) => {
     deleteCategory(id).then((res) => {
       setDeleteModal(false);
-      navigate('/categories')
+      navigate('/')
     });
   };
 
@@ -185,7 +187,7 @@ export default function Category() {
                   <div className='flex items-center justify-between'>
                     <span className='inline-flex items-center justify-center rounded-md bg-gray-300 p-3 shadow-lg'>
                       <img
-                        src={feature.iconUrl}
+                        src={getImageUrl(feature.icon)}
                         className='h-12 w-12'
                         aria-hidden='true'
                         alt={feature.name}
@@ -207,7 +209,7 @@ export default function Category() {
                     {feature.description.replaceAll('"', '')}
                   </p>
                   <img
-                    src={feature.coverImageUrl}
+                    src={getImageUrl(feature.coverImage)}
                     className='mt-1 w-full h-36'
                     alt={feature._id}
                   />
@@ -228,12 +230,13 @@ export default function Category() {
           </div>
         ) : (
           <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-            {products.map((product, i) => (
+            {products.length > 0 && products.map((product, i) => (
               <div key={product._id} className='pt-4'>
                 <div className='flow-root rounded-lg bg-gray-50 shadow-md h-full'>
                   <div className='mx-4'>
+
                     <img
-                      src={product.productImages[0]}
+                      src={product.productImages ? getImageUrl(product.productImages[0]) : getImageUrl()}
                       className='mt-1 w-full h-36 rounded-xl contain'
                       alt={product._id}
                     />

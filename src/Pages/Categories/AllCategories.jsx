@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories } from '../../services';
 import Breadcrumb from '../../Components/Breadcrumbs';
+import { getImageUrl } from '../../utils';
+import { PlusCircleIcon } from '@heroicons/react/outline';
 
 const pages = [
   {
-    name: 'All Categories',
-    href: '/categories',
+    name: 'Categories',
+    href: '/',
     current: true
   }
 ]
@@ -38,7 +40,14 @@ export default function AllCategories() {
   return (
     <>
       <Breadcrumb pages={pages} />
-
+      <div>
+        <div className='-mt-6 flex justify-end items-center'>
+          <Link
+            to={`/categories/new`}
+            className='inline-flex justify-center items-center px-2 border border-gray-300 rounded-md text-gray-700 bg-transparent hover:bg-gray-200 hover:border-gray-200'
+          >Add New Category<PlusCircleIcon className='border-l border-gray-300 ml-1 pl-1 h-6 w-6' /></Link>
+        </div>
+      </div>
       <div className='mt-6 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3'>
         {parentCategories.map((feature) => (
           <div key={feature._id} className='pt-6'>
@@ -47,7 +56,7 @@ export default function AllCategories() {
                 <div className='flex items-center justify-between'>
                   <span className='inline-flex items-center justify-center rounded-md bg-gray-300 p-3 shadow-lg'>
                     <img
-                      src={feature.iconUrl}
+                      src={getImageUrl(feature.icon)}
                       className='h-12 w-12'
                       aria-hidden='true'
                       alt={feature.name}
@@ -69,7 +78,7 @@ export default function AllCategories() {
                   {feature.description.replaceAll('"', '')}
                 </p>
                 <img
-                  src={feature.coverImageUrl}
+                  src={getImageUrl(feature.coverImage)}
                   className='mt-1 w-full h-36 rounded-xl'
                   alt={feature._id}
                 />

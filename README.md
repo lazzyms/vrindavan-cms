@@ -1,10 +1,20 @@
 # TO-DO
 
-[ ] Add updateDiscounts API and UI
+[x] Bulk Price change UI - partly done
 
-[ ] Add updatePrice API and UI
+[ ] Finish UI - return selected products, add discount/percentage input
 
-[ ] Need a search product API too.
+[ ] Add react-hook-form for Bulk price change, submit form action
+
+[ ] Integrate updateDiscounts API
+
+[ ] Integrate updatePrice API
+
+[ ] Reset form once success
+
+[ ] Fix product update with already uploaded image
+
+-- Pipeline --
 
 [ ] Category wise banners
 

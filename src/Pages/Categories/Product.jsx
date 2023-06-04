@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from "react";
 import { NotificationContext } from "../../Layout";
 import { Controller, useForm } from "react-hook-form";
@@ -6,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getProductsById, addOrUpdateProduct, uploadToCloudinary, removeFromCloudinary } from "../../services";
 import Breadcrumb from "../../Components/Breadcrumbs";
 import { XCircleIcon } from "@heroicons/react/solid";
+import { getImageUrl } from "../../utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -30,12 +32,12 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
             setColors(product.colors);
           }
           if (product.productImages) {
-            setImages(product.productImages);
+            setImages(product.productImages.map(img => getImageUrl(img)));
           }
           setPages([
             {
-              name: 'All Categories',
-              href: '/categories',
+              name: 'Categories',
+              href: '/',
               current: false
             },
             {
@@ -68,9 +70,9 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
   });
 
   const onSubmit = async (data) => {
-    console.log(data)
     data.categoryId = categoryId ? categoryId : productDetails.categoryId
     setLoading(true);
+
     if (data.productImages.length > 0) {
       const files = Array.from(data.productImages);
       data.productImages = await Promise.all(files.map(async (img, i) => {
@@ -80,6 +82,8 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
         const icon = await uploadToCloudinary(iconData);
         return icon.public_id;
       }))
+    } else {
+      data.productImages = productDetails.productImages;
     }
     data.colors = colors;
     addOrUpdateProduct(data)
@@ -95,7 +99,7 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
             navigate(`/categories/${data.categoryId}`);
           } else {
             handlePopup(false);
-            
+
           }
         } else {
           setNotificationState({
@@ -131,10 +135,9 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
   };
 
   const removeImage = (url) => {
-    console.log(pid)
     if (pid) {
-      const publicId = url.match(/\/v\d+\/(.+)\.\w{3,4}$/)[1];
-      removeFromCloudinary(publicId);
+      const publicId = url.match(/\/v\d+\/(.+)\.\w{3,4}$/);
+      removeFromCloudinary(publicId[0]);
     }
     setImages(images.filter(img => img !== url));
   }
@@ -158,7 +161,7 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
     <>
       <Breadcrumb pages={pages} />
       <form
-        className='space-y-8 divide-y divide-gray-200'
+        className='space-y-8 divide-y divide-gray-200 overflow-auto'
         onSubmit={handleSubmit(onSubmit)}
       >
         <div className='space-y-8 divide-y divide-gray-200 sm:space-y-5'>
@@ -286,6 +289,7 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
                               className='m-2 w-32 object-contain rounded-md'
                             />
                             <button
+                              type="button"
                               className='absolute top-0 right-0 text-gray-200 rounded-md text-sm invisible group-hover:visible'
                               onClick={() => removeImage(image)}
                             >

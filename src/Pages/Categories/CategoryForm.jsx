@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Switch } from '@headlessui/react';
@@ -11,6 +12,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { NotificationContext } from '../../Layout';
 import Breadcrumb from '../../Components/Breadcrumbs';
+import { getImageUrl } from '../../utils';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -26,13 +28,13 @@ export default function CategoryForm() {
   const [enabled, setEnabled] = useState(false);
   const [pages, setPages] = useState([
     {
-      name: 'All Categories',
-      href: '/categories',
+      name: 'Categories',
+      href: '/',
       current: false
     },
     {
       name: 'Add new',
-      href: `/categories`,
+      href: `/categories/new`,
       current: true
     }
   ]);
@@ -43,13 +45,13 @@ export default function CategoryForm() {
         .then((res) => {
           if (res.data.success) {
             setCategoryDetails(res.data.data);
-            setIcon(res.data.data.iconUrl);
-            setCover(res.data.data.coverImageUrl);
+            setIcon(getImageUrl(res.data.data.icon));
+            setCover(getImageUrl(res.data.data.coverImage));
             setEnabled(res.data.data.isVisible);
             setPages([
               {
-                name: 'All Categories',
-                href: '/categories',
+                name: 'Categories',
+                href: '/',
                 current: false
               },
               {
@@ -94,10 +96,6 @@ export default function CategoryForm() {
     formState: { errors }
   } = useForm();
 
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
-
   const onSubmit = async (data) => {
     setLoading(true);
     const coverData = new FormData();
@@ -130,7 +128,7 @@ export default function CategoryForm() {
             message: res.data.message,
             show: true
           });
-          navigate('/categories');
+          navigate('/');
         } else {
           setNotificationState({
             type: 'success',
