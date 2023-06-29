@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import WhiteLogo from '../Assets/White.png';
 import { login } from '../services';
+import { XCircleIcon } from '@heroicons/react/outline';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -18,8 +19,8 @@ export default function Login() {
     formState: { errors }
   } = useForm();
   const [requestError, setRequestError] = useState(null);
+
   const onSubmit = (data) => {
-    console.log(data);
     login(data)
       .then((res) => {
         if (res.data.success) {
@@ -58,8 +59,9 @@ export default function Login() {
                 <div className='m-3'>
                   <input
                     type='email'
-                    name='name'
-                    id='name'
+                    name='email'
+                    id='email'
+                    autoComplete='current-email'
                     className='shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 px-4 rounded-full py-2 leading-tight'
                     placeholder='Email Address'
                     {...register('email', { required: true })}
@@ -68,8 +70,9 @@ export default function Login() {
                 <div className='m-3'>
                   <input
                     type='password'
-                    name='name'
-                    id='name'
+                    name='password'
+                    id='password'
+                    autoComplete='current-password'
                     className='shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 px-4 rounded-full py-2 leading-tight'
                     placeholder='Password'
                     {...register('password', { required: true })}
@@ -80,6 +83,12 @@ export default function Login() {
                     Login
                   </button>
                 </div>
+                {requestError && <div className="flex rounded-md bg-red-50 p-4">
+                  <div className="flex-shrink-0">
+                    <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                    <h3 className="text-sm font-medium text-red-800">{requestError}</h3>
+                  </div>
+                </div>}
               </form>
             </div>
           </div>

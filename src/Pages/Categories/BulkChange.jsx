@@ -6,6 +6,7 @@ import { Combobox } from '@headlessui/react'
 import { debounce } from "lodash";
 import { getImageUrl } from "../../utils";
 import { XIcon } from "@heroicons/react/outline";
+import { useForm } from "react-hook-form";
 
 const pages = [
   {
@@ -60,11 +61,26 @@ export default function BulkChange() {
     }
   }, [productType])
 
+  const handleSelectedProducts = (products) => {
+    console.log(products);
+    // Add it to form data
+  }
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm();
+
+  const onSubmit = (data) => {
+    console.log(data);
+  }
+
   return (
     <>
       <Breadcrumb pages={pages} />
       <div className="flex">
-        <form>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-12 sm:space-y-16">
             <div>
               <div className="mt-5 space-y-8 sm:space-y-0 sm:border-t">
@@ -79,6 +95,9 @@ export default function BulkChange() {
                         name="productType"
                         className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         defaultValue=""
+                        {...register('type', {
+                          required: true
+                        })}
                         onChange={(event) => setProductType(event.target.value)}
                       >
                         <option disabled value="">Select</option>
@@ -117,7 +136,7 @@ export default function BulkChange() {
                       Search Products
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <SearchWithDropdownSelector />
+                      <SearchWithDropdownSelector handleSelectedProducts={handleSelectedProducts()} />
                     </div>
                   </div>
                 )}
@@ -142,6 +161,46 @@ export default function BulkChange() {
                     </div>
                   </div>
                 </div>
+                {changeType === 'discount' && (
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
+                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                      Discount (%)
+                    </label>
+                    <div className="mt-1 sm:mt-0 sm:col-span-2">
+                      <div className="max-w-lg flex rounded-md shadow-sm">
+                        <input
+                          type='number'
+                          name='discount'
+                          id='discount'
+                          className='flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300'
+                          {...register('discount', {
+                            required: true
+                          })}
+                          placeholder='i.e. 10, 5. (% of discount will be applied on price)'
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {changeType === 'adjustment' && (<div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                    Percentage update (+/- %)
+                  </label>
+                  <div className="mt-1 sm:mt-0 sm:col-span-2">
+                    <div className="max-w-lg flex rounded-md shadow-sm">
+                      <input
+                        type='number'
+                        name='percentage'
+                        id='percentage'
+                        className='flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300'
+                        {...register('percentage', {
+                          required: true
+                        })}
+                        placeholder='i.e. 10, -10 (% of price will be updated)'
+                      />
+                    </div>
+                  </div>
+                </div>)}
               </div>
             </div>
           </div>
@@ -181,6 +240,8 @@ function SearchWithDropdownSelector({ handleSelectedProduct }) {
     }
   }, [searchTerm])
 
+  const [selectedProducts, setSelectedProducts] = useState([])
+
   const handleSelect = (product) => {
     if (selectedProducts.some((p) => p._id === product._id)) {
       setSelectedProducts(selectedProducts.filter((p) => p._id !== product._id));
@@ -189,7 +250,9 @@ function SearchWithDropdownSelector({ handleSelectedProduct }) {
     }
   };
 
-  const [selectedProducts, setSelectedProducts] = useState([])
+  useEffect(() => {
+    handleSelectedProduct(selectedProducts)
+  }, [selectedProducts])
 
   return (
     <Combobox as="div" className="relative mt-1" value={selectedProducts} onChange={setSelectedProducts} multiple>

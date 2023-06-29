@@ -42,12 +42,12 @@ export default function Layout({ view, heading }) {
       icon: HomeIcon,
       current: location.pathname === '/'
     },
-    // {
-    //   name: 'Bulk Price change',
-    //   href: '/products/discount',
-    //   icon: AdjustmentsIcon,
-    //   current: location.pathname === '/products/discount'
-    // }
+    {
+      name: 'Bulk Price change',
+      href: '/products/discount',
+      icon: AdjustmentsIcon,
+      current: location.pathname === '/products/discount'
+    }
   ];
   useEffect(() => {
     if (!localStorage.getItem('token')) {
