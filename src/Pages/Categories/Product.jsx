@@ -76,10 +76,12 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
     if (data.productImages.length > 0) {
       const files = Array.from(data.productImages);
       data.productImages = await Promise.all(files.map(async (img, i) => {
-        const iconData = new FormData();
-        iconData.append('file', img);
-        iconData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
-        const icon = await uploadToCloudinary(iconData);
+        const productData = new FormData();
+        productData.append('file', img);
+        productData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
+        productData.append('folder', `products/${data.categoryId}/`);
+
+        const icon = await uploadToCloudinary(productData);
         return icon.public_id;
       }))
     } else {

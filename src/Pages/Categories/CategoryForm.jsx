@@ -103,10 +103,11 @@ export default function CategoryForm() {
       const iconData = new FormData();
       iconData.append('file', data.icon[0]);
       iconData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
+      iconData.append('folder', 'category-icons/');
       const icon = await uploadToCloudinary(iconData);
       data.icon = icon.public_id;
     } else if (id) {
-      data.icon = categoryDetails.icon;
+      data.icon = categoryDetails.icon ? categoryDetails.icon : "";
     }
     if (data.coverImage[0]) {
       coverData.append('file', data.coverImage[0]);
@@ -114,10 +115,11 @@ export default function CategoryForm() {
         'upload_preset',
         process.env.REACT_APP_CLOUDINARY_PRESET
       );
+      coverData.append('folder', 'category-cover/');
       const cover = await uploadToCloudinary(coverData);
       data.coverImage = cover.public_id;
     } else if (id) {
-      data.coverImage = categoryDetails.coverImage;
+      data.coverImage = categoryDetails.coverImage ? categoryDetails.coverImage : "";
     }
     addOrUpdateCategories(data)
       .then((res) => {
@@ -250,6 +252,7 @@ export default function CategoryForm() {
                         className='sr-only'
                         defaultValue={categoryDetails.icon}
                         {...register('icon', {
+                          required: true,
                           onChange: (e) => handleIconChange(e)
                         })}
                       />
