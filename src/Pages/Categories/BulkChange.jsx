@@ -1,6 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import Breadcrumb from "../../Components/Breadcrumbs";
-import { getCategories, searchProductsByName } from "../../services";
+import { getCategories, searchProductsByName, updateBulkDiscount, updateBulkPriceByPercentage } from "../../services";
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/solid'
 import { Combobox } from '@headlessui/react'
 import { debounce } from "lodash";
@@ -44,11 +44,11 @@ const allProductTypes = [
 ]
 export default function BulkChange() {
   const { setNotificationState } = useContext(NotificationContext);
-  const [changeType, setChangeType] = useState(null)
-  const [productType, setProductType] = useState(null)
+  const [changeType, setChangeType] = useState('')
+  const [productType, setProductType] = useState('')
   const [parentCategories, setParentCategories] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState([]);
+  const [searchProducts, setSearchProducts] = useState([]);
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
     if (productType === 'category') {
       getCategories()
@@ -70,19 +70,82 @@ export default function BulkChange() {
     }
   }, [productType])
 
-  const handleSelectedProducts = (products) => {
-    console.log(products);
-    // Add it to form data
-  }
-
   const {
     register,
     handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    reset
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log(data);
+    setLoading(true)
+    data.bulkIds = []
+    data.id = data.id ? data.id : ''
+    if (data.type === 'products') {
+      if (searchProducts.length > 0) {
+        data.bulkIds = searchProducts;
+      } else {
+        setNotificationState({
+          type: 'error',
+          message: 'Please select at least one product',
+          show: true
+        });
+        return
+      }
+    }
+    if (changeType === 'discount') {
+      updateBulkDiscount(data)
+        .then((res) => {
+          if (res.data.success) {
+            setNotificationState({
+              type: 'success',
+              message: res.data.message,
+              show: true
+            });
+          }
+          setLoading(false)
+          setChangeType('')
+          setProductType('')
+          reset()
+        })
+        .catch((err) => {
+          setNotificationState({
+            type: 'error',
+            message:
+              err.response.status === 400
+                ? err.response.data.error.message
+                : err.message,
+            show: true
+          });
+          setLoading(false)
+        })
+    } else {
+      updateBulkPriceByPercentage(data)
+        .then((res) => {
+          if (res.data.success) {
+            setNotificationState({
+              type: 'success',
+              message: res.data.message,
+              show: true
+            });
+          }
+          setLoading(false)
+          setChangeType('')
+          setProductType('')
+          reset()
+        })
+        .catch((err) => {
+          setNotificationState({
+            type: 'error',
+            message:
+              err.response.status === 400
+                ? err.response.data.error.message
+                : err.message,
+            show: true
+          });
+          setLoading(false)
+        })
+    }
   }
 
   return (
@@ -125,10 +188,13 @@ export default function BulkChange() {
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
                         <select
-                          id="productType"
-                          name="productType"
+                          id="categoryId"
+                          name="categoryId"
                           className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                           defaultValue=""
+                          {...register('id', {
+                            required: true
+                          })}
                         >
                           <option disabled value="">Select</option>
                           {parentCategories.map((cat, index) => (
@@ -145,7 +211,7 @@ export default function BulkChange() {
                       Search Products
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <SearchWithDropdownSelector handleSelectedProducts={handleSelectedProducts()} />
+                      <SearchWithDropdownSelector handleSelectedProducts={setSearchProducts} />
                     </div>
                   </div>
                 )}
@@ -210,6 +276,35 @@ export default function BulkChange() {
                     </div>
                   </div>
                 </div>)}
+                <div className="mt-1 sm:mt-0">
+                  <button
+                    type='submit'
+                    className={classNames(
+                      loading ? 'cursor-not-allowed animate-pulse' : '',
+                      'w-full my-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none'
+                    )}
+                  >
+                    Update price
+                    {loading && (
+                      <span className='ml-1'>
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          className='h-6 w-6'
+                          fill='none'
+                          viewBox='0 0 24 24'
+                          stroke='currentColor'
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                            d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'
+                          />
+                        </svg>
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -223,7 +318,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-function SearchWithDropdownSelector({ handleSelectedProduct }) {
+function SearchWithDropdownSelector({ handleSelectedProducts }) {
   const [searchResult, setSearchResult] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const setNotificationState = useContext(NotificationContext);
@@ -267,7 +362,9 @@ function SearchWithDropdownSelector({ handleSelectedProduct }) {
   };
 
   useEffect(() => {
-    handleSelectedProduct(selectedProducts)
+    if (selectedProducts.length > 0) {
+      handleSelectedProducts(selectedProducts.map(p => p._id))
+    }
   }, [selectedProducts])
 
   return (
