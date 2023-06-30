@@ -53,7 +53,14 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
           ])
         }
       }).catch((err) => {
-        console.log(err);
+        setNotificationState({
+          type: 'error',
+          message:
+            err.response.status === 400
+              ? err.response.data.error.message
+              : err.message,
+          show: true
+        });
       });
     }
   }, [])
@@ -109,7 +116,6 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
             message: res.data.message,
             show: true
           });
-          console.log(res.data.error);
         }
       })
       .catch((err) => {
@@ -118,11 +124,10 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
           type: 'error',
           message:
             err.response.status === 400
-              ? err.response.data.message
+              ? err.response.data.error.message
               : err.message,
           show: true
         });
-        console.log(err);
       });
   };
 
@@ -277,6 +282,7 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
                         multiple
                         className='sr-only'
                         {...register('productImages', {
+                          required: true,
                           onChange: (e) => handleImageUpdate(e)
                         })}
                       />

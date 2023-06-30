@@ -23,8 +23,8 @@ export default function CategoryForm() {
   const { setNotificationState } = useContext(NotificationContext);
 
   const [categoryDetails, setCategoryDetails] = useState({});
-  const [icon, setIcon] = useState();
-  const [cover, setCover] = useState();
+  const [icon, setIcon] = useState('');
+  const [cover, setCover] = useState('');
   const [enabled, setEnabled] = useState(false);
   const [pages, setPages] = useState([
     {
@@ -69,7 +69,14 @@ export default function CategoryForm() {
           }
         })
         .catch((err) => {
-          console.log(err);
+          setNotificationState({
+            type: 'error',
+            message:
+              err.response.status === 400
+                ? err.response.data.error.message
+                : err.message,
+            show: true
+          });
         });
     }
   }, [id]);
@@ -85,7 +92,14 @@ export default function CategoryForm() {
         }
       })
       .catch((err) => {
-        console.log(err);
+        setNotificationState({
+          type: 'error',
+          message:
+            err.response.status === 400
+              ? err.response.data.error.message
+              : err.message,
+          show: true
+        });
       });
   }, []);
 
@@ -120,6 +134,8 @@ export default function CategoryForm() {
       data.coverImage = cover.public_id;
     } else if (id) {
       data.coverImage = categoryDetails.coverImage ? categoryDetails.coverImage : "";
+    } else {
+      data.coverImage = '';
     }
     addOrUpdateCategories(data)
       .then((res) => {
@@ -137,7 +153,6 @@ export default function CategoryForm() {
             message: res.data.message,
             show: true
           });
-          console.log(res.data.error);
         }
       })
       .catch((err) => {
@@ -146,22 +161,19 @@ export default function CategoryForm() {
           type: 'error',
           message:
             err.response.status === 400
-              ? err.response.data.message
+              ? err.response.data.error.message
               : err.message,
           show: true
         });
-
-        console.log(err);
       });
   };
 
   const handleIconChange = (e) => {
-    console.log(e.target.files);
     if (e.target.files && e.target.files.length > 0) {
       setIcon(URL.createObjectURL(e.target.files[0]));
     } else {
       URL.revokeObjectURL(icon);
-      setIcon();
+      setIcon('');
     }
   };
   const handleCoverChange = (e) => {
@@ -169,7 +181,7 @@ export default function CategoryForm() {
       setCover(URL.createObjectURL(e.target.files[0]));
     } else {
       URL.revokeObjectURL(cover);
-      setCover();
+      setCover('');
     }
   };
   return (

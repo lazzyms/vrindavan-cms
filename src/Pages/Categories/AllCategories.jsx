@@ -1,10 +1,11 @@
 import { EyeIcon, PencilIcon } from '@heroicons/react/solid';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories } from '../../services';
 import Breadcrumb from '../../Components/Breadcrumbs';
 import { getImageUrl } from '../../utils';
 import { PlusCircleIcon } from '@heroicons/react/outline';
+import { NotificationContext } from '../../Layout';
 
 const pages = [
   {
@@ -15,6 +16,7 @@ const pages = [
 ]
 
 export default function AllCategories() {
+  const { setNotificationState } = useContext(NotificationContext);
 
   const [loading, setLoading] = useState(true);
   const [parentCategories, setParentCategories] = useState([]);
@@ -28,7 +30,14 @@ export default function AllCategories() {
       })
       .catch((err) => {
         setLoading(false);
-        console.log(err);
+        setNotificationState({
+          type: 'error',
+          message:
+            err.response.status === 400
+              ? err.response.data.error.message
+              : err.message,
+          show: true
+        });
       });
   }, []);
   if (loading) {

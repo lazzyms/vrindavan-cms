@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import Breadcrumb from "../../Components/Breadcrumbs";
 import { getCategories, searchProductsByName } from "../../services";
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/solid'
@@ -7,6 +7,7 @@ import { debounce } from "lodash";
 import { getImageUrl } from "../../utils";
 import { XIcon } from "@heroicons/react/outline";
 import { useForm } from "react-hook-form";
+import { NotificationContext } from "../../Layout";
 
 const pages = [
   {
@@ -42,6 +43,7 @@ const allProductTypes = [
   }
 ]
 export default function BulkChange() {
+  const { setNotificationState } = useContext(NotificationContext);
   const [changeType, setChangeType] = useState(null)
   const [productType, setProductType] = useState(null)
   const [parentCategories, setParentCategories] = useState([]);
@@ -56,7 +58,14 @@ export default function BulkChange() {
           }
         })
         .catch((err) => {
-          console.log(err);
+          setNotificationState({
+            type: 'error',
+            message:
+              err.response.status === 400
+                ? err.response.data.error.message
+                : err.message,
+            show: true
+          });
         });
     }
   }, [productType])
@@ -217,7 +226,7 @@ function classNames(...classes) {
 function SearchWithDropdownSelector({ handleSelectedProduct }) {
   const [searchResult, setSearchResult] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
-
+  const setNotificationState = useContext(NotificationContext);
   const handleSearch = debounce((searchTerm) => {
     if (searchTerm) {
       searchProductsByName({ query: searchTerm })
@@ -227,7 +236,14 @@ function SearchWithDropdownSelector({ handleSelectedProduct }) {
           }
         })
         .catch((err) => {
-          console.log(err);
+          setNotificationState({
+            type: 'error',
+            message:
+              err.response.status === 400
+                ? err.response.data.error.message
+                : err.message,
+            show: true
+          });
         });
     } else {
       setSearchResult([]);

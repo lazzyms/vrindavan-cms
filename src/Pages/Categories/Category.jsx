@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { PencilIcon } from '@heroicons/react/outline';
 import { EyeIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDialouge from '../../Components/ConfirmDialouge';
@@ -16,10 +16,12 @@ import {
 import Product from './Product';
 import Breadcrumb from '../../Components/Breadcrumbs';
 import { getImageUrl } from '../../utils';
+import { NotificationContext } from '../../Layout';
 
 export default function Category() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { setNotificationState } = useContext(NotificationContext);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
   const [categoryDetails, setCategoryDetails] = useState();
@@ -39,7 +41,14 @@ export default function Category() {
       })
       .catch((err) => {
         setProductsLoading(false);
-        console.log(err);
+        setNotificationState({
+          type: 'error',
+          message:
+            err.response.status === 400
+              ? err.response.data.error.message
+              : err.message,
+          show: true
+        });
       });
   }
 
@@ -65,7 +74,14 @@ export default function Category() {
       })
       .catch((err) => {
         setCategoryLoading(false);
-        console.log(err);
+        setNotificationState({
+          type: 'error',
+          message:
+            err.response.status === 400
+              ? err.response.data.error.message
+              : err.message,
+          show: true
+        });
       });
     getFreshCategories();
   }, [id]);
