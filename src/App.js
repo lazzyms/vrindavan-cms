@@ -9,6 +9,8 @@ import {
 } from './Pages';
 import Product from './Pages/Categories/Product';
 import BulkChange from './Pages/Categories/BulkChange';
+import Banners from './Pages/Banners';
+import BannerForm from './Pages/BannerForm';
 
 const routes = [
   {
@@ -45,6 +47,16 @@ const routes = [
     path: '/products/discount',
     exact: true,
     component: <Layout view={<BulkChange />} />
+  },
+  {
+    path: '/banners',
+    exact: true,
+    component: <Layout view={<Banners />} />
+  },
+  {
+    path: '/banners/new',
+    exact: true,
+    component: <Layout view={<BannerForm />} />
   }
 ];
 

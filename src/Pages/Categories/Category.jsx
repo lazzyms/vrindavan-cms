@@ -17,6 +17,8 @@ import Product from './Product';
 import Breadcrumb from '../../Components/Breadcrumbs';
 import { getImageUrl } from '../../utils';
 import { NotificationContext } from '../../Layout';
+import CategoryCard from '../../Components/CategoryCard';
+import ProductCard from '../../Components/ProductCard';
 
 export default function Category() {
   const { id } = useParams();
@@ -135,59 +137,53 @@ export default function Category() {
             </div>
           </div>
         ) : (
-          <div className='lg:flex lg:items-between lg:justify-between'>
-            <div className='inline-flex'>
-              <p className='my-auto text-base text-gray-500'>
+          <div className='grid grid-cols-3 lg:items-between lg:justify-between gap-1'>
+            <div className='col-span-2'>
+              <p className='my-auto text-base text-gray-500 h-20 text-clip overflow-auto'>
                 {categoryDetails.description.replaceAll('"', '')}
               </p>
             </div>
-            <div className='inline-flex'>
-              <div className='inline-flex'>
-                <Link
-                  to={`/categories/edit/${categoryDetails._id}`}
-                  className='inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
-                >
-                  Edit Category
-                </Link>
-              </div>
+            <div className='grid grid-cols-3 items-center gap-1'>
+              <Link
+                to={`/categories/edit/${categoryDetails._id}`}
+                className='h-full w-full inline-flex items-center justify-center p-2 border border-transparent font-medium rounded-xl text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
+              >
+                Edit Category
+              </Link>
               {categoryDetails.subCategories.length === 0 && (
                 <>
-                  <div className='ml-3 inline-flex'>
-                    <button
-                      type='button'
-                      className='inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
-                      onClick={() => setInsertForm(true)}
-                    >
-                      <PlusIcon className='h-4 w-4' />
-                      <span>Add Product</span>
-                    </button>
-                    <Popup
-                      heading='Add Product'
-                      open={insertForm}
-                      setOpen={setInsertForm}
-                      content={<Product categoryId={id} categoryName={categoryDetails.name} handlePopup={setInsertForm} />}
-                    />
-                  </div>
+                  <button
+                    type='button'
+                    className='h-full w-full flex items-center justify-center p-2 border border-transparent font-medium rounded-xl text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
+                    onClick={() => setInsertForm(true)}
+                  >
+                    <PlusIcon className='h-4 w-4' />
+                    <span>Add Product</span>
+                  </button>
+                  <Popup
+                    heading='Add Product'
+                    open={insertForm}
+                    setOpen={setInsertForm}
+                    content={<Product categoryId={id} categoryName={categoryDetails.name} handlePopup={setInsertForm} />}
+                  />
 
-                  <div className='ml-3 inline-flex'>
-                    <button
-                      type='button'
-                      className='text-red-500 inline-flex items-center justify-center p-2 border border-transparent text-base font-medium rounded text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
-                      onClick={() => setDeleteModal(true)}
-                    >
-                      Delete Category
-                    </button>
-                    <ErrorBoundary>
-                      <ConfirmDialouge
-                        id={id}
-                        open={deleteModal}
-                        setOpen={(e) => setDeleteModal(e)}
-                        message='Warning: You are about to erase the category and all its contents. This is a permanent action and cannot be reversed. Please confirm if you want to proceed.'
-                        title={`Delete ${categoryDetails.name}`}
-                        handleAction={(e) => onDelete(e)}
-                      />
-                    </ErrorBoundary>
-                  </div>
+                  <button
+                    type='button'
+                    className='h-full w-full text-red-500 items-center justify-center p-2 border border-transparent font-medium rounded-xl text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
+                    onClick={() => setDeleteModal(true)}
+                  >
+                    Delete Category
+                  </button>
+                  <ErrorBoundary>
+                    <ConfirmDialouge
+                      id={id}
+                      open={deleteModal}
+                      setOpen={(e) => setDeleteModal(e)}
+                      message='Warning: You are about to erase the category and all its contents. This is a permanent action and cannot be reversed. Please confirm if you want to proceed.'
+                      title={`Delete ${categoryDetails.name}`}
+                      handleAction={(e) => onDelete(e)}
+                    />
+                  </ErrorBoundary>
                 </>
               )}
             </div>
@@ -195,43 +191,9 @@ export default function Category() {
         )}
       </div>
       {!categoryLoading && categoryDetails.subCategories.length > 0 && (
-        <div className='grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3'>
           {categoryDetails.subCategories.map((feature) => (
-            <div key={feature._id} className='mt-4 pt-6'>
-              <div className='flow-root rounded-lg bg-gray-50 px-6 pb-8'>
-                <div className='-mt-6'>
-                  <div className='flex items-center justify-between'>
-                    <span className='inline-flex items-center justify-center rounded-md bg-gray-300 p-3 shadow-lg'>
-                      <img
-                        src={getImageUrl(feature.icon)}
-                        className='h-12 w-12'
-                        aria-hidden='true'
-                        alt={feature.name}
-                      />
-                    </span>
-                    <div className='flex'>
-                      <Link to={`/categories/${feature._id}`}>
-                        <EyeIcon className='m-1 mt-8 p-2 text-gray-600 hover:text-gray-900 h-8 w-8 border rounded-full hover:shadow' />
-                      </Link>
-                      <Link to={`/categories/edit/${feature._id}`}>
-                        <PencilIcon className='m-1 mt-8 p-2 text-gray-600 hover:text-gray-900 h-8 w-8 border rounded-full hover:shadow' />
-                      </Link>
-                    </div>
-                  </div>
-                  <h3 className='mt-4 text-lg font-medium tracking-tight text-gray-900'>
-                    {feature.name}
-                  </h3>
-                  <p className='mt-1 text-base text-gray-500'>
-                    {feature.description.replaceAll('"', '')}
-                  </p>
-                  <img
-                    src={getImageUrl(feature.coverImage)}
-                    className='mt-1 w-full h-36'
-                    alt={feature._id}
-                  />
-                </div>
-              </div>
-            </div>
+            <CategoryCard key={feature._id} feature={feature} />
           ))}
         </div>
       )}
@@ -247,58 +209,8 @@ export default function Category() {
         ) : (
           <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
             {products.length > 0 && products.map((product, i) => (
-              <div key={product._id} className='pt-4'>
-                <div className='flow-root rounded-lg bg-gray-50 shadow-md h-full'>
-                  <div className='mx-4'>
-
-                    <img
-                      src={product.productImages ? getImageUrl(product.productImages[0]) : getImageUrl()}
-                      className='mt-1 w-full h-36 rounded-xl contain'
-                      alt={product._id}
-                    />
-                    <div className='flex items-center justify-between'>
-                      <h3 className='mt-1 text-lg font-medium tracking-tight text-gray-900'>
-                        {product.name}
-                      </h3>
-                      <h3 className='mt-1 text-lg font-medium tracking-tight text-gray-800'>
-                        ₹{product.price}
-                      </h3>
-                    </div>
-                    {product.description.replaceAll('"', '') ? <p className='mt-1 h-8 text-base text-gray-600'>
-                      {product.description.replaceAll('"', '')}
-                    </p> : <p className='mt-1 h-8 text-base text-gray-400'>
-                      No description provided
-                    </p>}
-
-                  </div>
-                  <div className="isolate inline-flex rounded-md w-full border-t">
-                    <Link
-                      className='relative inline-flex items-center justify-center hover:shadow-md rounded-l-md px-2 py-2 text-sm font-semibold w-1/2 border-r'
-                      to={`/products/${product._id}`}
-                    >
-                      <EyeIcon className='h-6 w-6 text-gray-700' />
-                      <span className="px-2 text-gray-700">Edit</span>
-                    </Link>
-                    <button
-                      className='relative -ml-px inline-flex items-center justify-center hover:shadow-md rounded-r-md px-2 py-2 text-sm font-semibold w-1/2 border-l'
-                      onClick={() => setProdDeleteModal(true)}
-                    >
-                      <TrashIcon className='h-6 w-6 text-red-400' />
-                      <span className="px-2 text-red-400">Delete</span>
-                    </button>
-                  </div>
-                  <ErrorBoundary>
-                    <ConfirmDialouge
-                      id={product._id}
-                      open={prodDeleteModal}
-                      setOpen={(e) => setProdDeleteModal(e)}
-                      message='Warning: You are about to remove the product and all its contents. This is a permanent action and cannot be reversed. Please confirm if you want to proceed.'
-                      title={`Delete ${product.name}`}
-                      handleAction={(e) => removeProduct(e)}
-                    />
-                  </ErrorBoundary>
-                </div>
-              </div>))}
+              <ProductCard key={product._id} product={product} prodDeleteModal={prodDeleteModal} setProdDeleteModal={setProdDeleteModal} removeProduct={removeProduct} />
+            ))}
           </div>
         )}
       </div>

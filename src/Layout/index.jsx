@@ -12,16 +12,16 @@ import {
   HomeIcon,
   LogoutIcon,
   MenuIcon,
+  PhotographIcon,
   XIcon
 } from '@heroicons/react/outline';
 import Notification from '../Components/Notification';
+import { classNames } from '../utils';
 export const NotificationContext = React.createContext(null);
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
+export const WindowWidthContext = React.createContext(null);
 
 export default function Layout({ view, heading }) {
+  const [isMobile, setIsMobile] = useState(false);
   const [notificationState, setNotificationState] = useState({
     show: false,
     message: '',
@@ -40,19 +40,37 @@ export default function Layout({ view, heading }) {
       name: 'Categories',
       href: '/',
       icon: HomeIcon,
-      current: location.pathname === '/'
+      current:
+        location.pathname === '/' ||
+        location.pathname.startsWith('/categories') ||
+        (location.pathname.startsWith('/products/') &&
+          location.pathname !== '/products/discount')
     },
     {
       name: 'Bulk Price change',
       href: '/products/discount',
       icon: AdjustmentsIcon,
       current: location.pathname === '/products/discount'
+    },
+    {
+      name: 'Banners',
+      href: '/banners',
+      icon: PhotographIcon,
+      current: location.pathname === '/banners'
     }
   ];
+  const width = window.matchMedia('(max-width: 400px)');
+  const onChange = () => setIsMobile(!!width.matches);
   useEffect(() => {
+    width.addEventListener('change', onChange);
+
+    setIsMobile(width.matches);
+
     if (!localStorage.getItem('token')) {
       navigate('/login');
     }
+
+    return () => width.removeEventListener('change', onChange);
   }, []);
 
   const handleLogout = () => {
@@ -307,8 +325,10 @@ export default function Layout({ view, heading }) {
                     {heading}
                   </h1>
                 </div>
-                <div className='max-w-7xl mx-auto px-4 sm:px-6 md:px-8'>
-                  <div className='py-4'>{view}</div>
+                <div className='max-w-7xl mx-auto px-4 sm:px-6 md:px-2 xl:px-2'>
+                  <WindowWidthContext.Provider value={isMobile}>
+                    <div className='py-4'>{view}</div>
+                  </WindowWidthContext.Provider>
                 </div>
               </div>
             </main>

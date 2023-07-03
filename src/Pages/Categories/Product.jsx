@@ -1,22 +1,32 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useEffect, useState } from "react";
-import { NotificationContext } from "../../Layout";
-import { Controller, useForm } from "react-hook-form";
-import { Switch } from "@headlessui/react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getProductsById, addOrUpdateProduct, uploadToCloudinary, removeFromCloudinary } from "../../services";
-import Breadcrumb from "../../Components/Breadcrumbs";
-import { XCircleIcon } from "@heroicons/react/solid";
-import { getImageUrl } from "../../utils";
+import { useContext, useEffect, useState } from 'react';
+import { NotificationContext, WindowWidthContext } from '../../Layout';
+import { Controller, useForm } from 'react-hook-form';
+import { Switch } from '@headlessui/react';
+import { useNavigate, useParams } from 'react-router-dom';
+import {
+  getProductsById,
+  addOrUpdateProduct,
+  uploadToCloudinary,
+  removeFromCloudinary
+} from '../../services';
+import Breadcrumb from '../../Components/Breadcrumbs';
+import { XCircleIcon } from '@heroicons/react/solid';
+import { classNames, getImageUrl } from '../../utils';
+import MarkDownInput from '../../Components/MarkDownInput';
+import { ErrorMessage } from '@hookform/error-message';
+import LoaderSvg from '../../Components/LoaderSvg';
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
-
-export default function Product({ categoryId = '', categoryName = '', handlePopup }) {
-  const { pid } = useParams();
+export default function Product({
+  categoryId = '',
+  categoryName = '',
+  productId = '',
+  handlePopup
+}) {
   const navigate = useNavigate();
+  const pid = productId;
   const { setNotificationState } = useContext(NotificationContext);
+  const isMobile = useContext(WindowWidthContext);
   const [productDetails, setProductDetails] = useState(null);
   const [pages, setPages] = useState([]);
   const [colors, setColors] = useState([]);
@@ -24,76 +34,98 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
 
   useEffect(() => {
     if (!categoryId) {
-      getProductsById(pid).then(res => {
-        if (res.data.success) {
-          const product = res.data.data;
-          setProductDetails(product);
-          if (product.colors) {
-            setColors(product.colors);
-          }
-          if (product.productImages) {
-            setImages(product.productImages.map(img => getImageUrl(img)));
-          }
-          setPages([
-            {
-              name: 'Categories',
-              href: '/',
-              current: false
-            },
-            {
-              name: categoryName ? categoryName : product.categoryName,
-              href: `/categories/${product.categoryId}`,
-              current: false
-            },
-            {
-              name: 'Edit Product',
-              href: `/products/${pid}`,
-              current: true
+      getProductsById(pid)
+        .then((res) => {
+          if (res.data.success) {
+            const product = res.data.data;
+            setProductDetails(product);
+            if (product.colors) {
+              setColors(product.colors);
             }
-          ])
-        }
-      }).catch((err) => {
-        setNotificationState({
-          type: 'error',
-          message:
-            err.response.status === 400
-              ? err.response.data.error.message
-              : err.message,
-          show: true
+            if (product.productImages) {
+              setImages(
+                product.productImages.map((img) => getImageUrl(img, isMobile))
+              );
+            }
+            setPages([
+              {
+                name: 'Categories',
+                href: '/',
+                current: false
+              },
+              {
+                name: categoryName ? categoryName : product.categoryName,
+                href: `/categories/${product.categoryId}`,
+                current: false
+              },
+              {
+                name: 'Edit Product',
+                href: `/products/${pid}`,
+                current: true
+              }
+            ]);
+          }
+        })
+        .catch((err) => {
+          setNotificationState({
+            type: 'error',
+            message:
+              err.response.status === 400
+                ? err.response.data.error.message
+                : err.message,
+            show: true
+          });
         });
-      });
     }
-  }, [])
+  }, []);
 
   const [loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
     control,
-  } = useForm({
-    defaultValues: {
-      isVisible: productDetails ? productDetails.isVisible : true,
-    }
-  });
+    formState: { errors },
+    watch,
+    setValue
+  } = useForm();
+
+  useEffect(() => {
+    setValue('name', productDetails?.name ?? '');
+    setValue('description', productDetails?.description ?? '');
+    setValue('price', productDetails?.price ?? '');
+    setValue('isVisible', productDetails?.isVisible ?? '');
+  }, [productDetails]);
+
+  const watchAllFields = watch();
+
+  useEffect(() => {
+    console.log(watchAllFields);
+  }, [watchAllFields]);
 
   const onSubmit = async (data) => {
-    data.categoryId = categoryId ? categoryId : productDetails.categoryId
+    console.log('submit', data);
+    data.categoryId = categoryId ? categoryId : productDetails.categoryId;
     setLoading(true);
-
     if (data.productImages.length > 0) {
       const files = Array.from(data.productImages);
-      data.productImages = await Promise.all(files.map(async (img, i) => {
-        const productData = new FormData();
-        productData.append('file', img);
-        productData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
-        productData.append('folder', `products/${data.categoryId}/`);
+      data.productImages = await Promise.all(
+        files.map(async (img, i) => {
+          const productData = new FormData();
+          productData.append('file', img);
+          productData.append(
+            'upload_preset',
+            process.env.REACT_APP_CLOUDINARY_PRESET
+          );
+          productData.append('folder', `products/${data.categoryId}/`);
 
-        const icon = await uploadToCloudinary(productData);
-        return icon.public_id;
-      }))
+          const icon = await uploadToCloudinary(productData);
+          return icon.public_id;
+        })
+      );
     } else {
       data.productImages = productDetails.productImages;
     }
+    console.log(colors);
     data.colors = colors;
     addOrUpdateProduct(data)
       .then((res) => {
@@ -108,7 +140,6 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
             navigate(`/categories/${data.categoryId}`);
           } else {
             handlePopup(false);
-
           }
         } else {
           setNotificationState({
@@ -134,9 +165,9 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
   const handleImageUpdate = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
-      setImages(files.map(file => URL.createObjectURL(file)));
+      setImages(files.map((file) => URL.createObjectURL(file)));
     } else {
-      images.map(image => URL.revokeObjectURL(image));
+      images.map((image) => URL.revokeObjectURL(image));
       setImages([]);
     }
   };
@@ -146,19 +177,14 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
       const publicId = url.match(/\/v\d+\/(.+)\.\w{3,4}$/);
       removeFromCloudinary(publicId[0]);
     }
-    setImages(images.filter(img => img !== url));
-  }
-
-  const handleChangeColor = (e, i) => {
-    const newColors = [...colors];
-    newColors[i] = e.target.value;
-    setColors(newColors);
+    setImages(images.filter((img) => img !== url));
   };
 
   const removeColor = (color) => {
-    const newColors = colors.filter(c => c !== color);
+    const newColors = colors.filter((c) => c !== color);
     setColors(newColors);
-  }
+    setValue('colors', newColors);
+  };
 
   const addNewColor = () => {
     setColors([...colors, '']);
@@ -184,7 +210,7 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
             <div className='mt-6 sm:mt-5 space-y-6 sm:space-y-5'>
               <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
                 <label
-                  htmlFor='username'
+                  htmlFor='name'
                   className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
                 >
                   Name
@@ -193,13 +219,10 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
                   <div className='max-w-lg flex rounded-md shadow-sm'>
                     <input
                       type='text'
-                      name='name'
                       id='name'
-                      autoComplete='name'
-                      defaultValue={productDetails && productDetails.name}
                       className='text-input'
                       {...register('name', {
-                        required: true
+                        required: 'Product name is required'
                       })}
                       placeholder='Enter name of Product Category, e.g. Sofa'
                     />
@@ -208,40 +231,52 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
               </div>
 
               <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-                <label
-                  htmlFor='about'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-                >
+                <span className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
                   Description
-                </label>
+                </span>
                 <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                  <textarea
-                    id='description'
+                  {/* <input
+                      type='text'
+                      id='description'
+                      className='text-input'
+                      {...register('description')}
+                      placeholder='Enter description of Product Category'
+                    /> */}
+                  <Controller
+                    control={control}
                     name='description'
-                    rows={3}
-                    defaultValue={productDetails && productDetails.description}
-                    className='max-w-lg text-input'
-                    placeholder='Enter a description of the category'
-                    {...register('description')}
+                    render={({ field }) => (
+                      <MarkDownInput
+                        id='description'
+                        {...field}
+                        defaultValue={
+                          productDetails && productDetails.description
+                        }
+                      />
+                    )}
                   />
                 </div>
               </div>
 
               <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5'>
-                <label
-                  htmlFor='photo'
-                  className='block text-sm font-medium text-gray-700'
-                >
+                <span className='block text-sm font-medium text-gray-700'>
                   Color options
-                </label>
+                </span>
                 <div className='mt-1 sm:mt-0 sm:col-span-2 flex item-center'>
                   {colors.map((color, index) => (
-                    <div key={color + index} className="relative group">
-                      <input
-                        type='color'
-                        defaultValue={color}
-                        className='my-auto h-8'
-                        onChange={(e) => handleChangeColor(e, index)}
+                    <div key={color + index} className='relative group'>
+                      <Controller
+                        name={`colors[${index}]`}
+                        control={control}
+                        render={({ field }) => (
+                          <input
+                            id='colors[]'
+                            type='color'
+                            defaultValue={color}
+                            className='my-auto h-8'
+                            {...field}
+                          />
+                        )}
                       />
                       <button
                         className='absolute top-full left-0 right-0 text-gray-200 bg-red-900 rounded-md text-sm invisible group-hover:visible'
@@ -261,12 +296,9 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
               </div>
 
               <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-                <label
-                  htmlFor='cover-photo'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-                >
+                <span className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
                   Product Images
-                </label>
+                </span>
                 <div className='mt-1 sm:mt-0 sm:col-span-2'>
                   <div className='flex items-center'>
                     <label
@@ -276,7 +308,6 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
                       <span>Upload Images</span>
                       <input
                         id='productImages'
-                        name='productImages'
                         type='file'
                         accept='image/*'
                         multiple
@@ -297,7 +328,7 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
                               className='m-2 w-32 object-contain rounded-md'
                             />
                             <button
-                              type="button"
+                              type='button'
                               className='absolute top-0 right-0 text-gray-200 rounded-md text-sm invisible group-hover:visible'
                               onClick={() => removeImage(image)}
                             >
@@ -312,19 +343,18 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
               </div>
               <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
                 <label
-                  htmlFor='username'
+                  htmlFor='price'
                   className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
                 >
                   Price
                 </label>
                 <div className='mt-1 sm:mt-0 sm:col-span-2'>
                   <div className='max-w-xs relative mt-2 rounded-md shadow-sm'>
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <span className="text-gray-400">₹</span>
+                    <div className='pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3'>
+                      <span className='text-gray-400'>₹</span>
                     </div>
                     <input
                       type='number'
-                      name='price'
                       id='price'
                       autoComplete='price'
                       defaultValue={productDetails && productDetails.price}
@@ -337,24 +367,29 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
                 </div>
               </div>
               <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
-                <label
-                  htmlFor='cover-photo'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
-                >Show/Hide</label>
+                <span className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'>
+                  Show/Hide
+                </span>
                 <Controller
-                  name="isVisible"
+                  id='isVisible'
+                  name='isVisible'
                   control={control}
                   render={({ field: { value, onChange } }) => (
                     <Switch
                       checked={value}
+                      defaultChecked={
+                        productDetails ? productDetails.isVisible : true
+                      }
                       onChange={onChange}
-                      className={`${value ? 'bg-indigo-600' : 'bg-gray-200'
-                        } relative inline-flex items-center h-6 rounded-full w-11`}
+                      className={`${
+                        value ? 'bg-indigo-600' : 'bg-gray-200'
+                      } relative inline-flex items-center h-6 rounded-full w-11`}
                     >
-                      <span className="sr-only">Show/Hide</span>
+                      <span className='sr-only'>Show/Hide</span>
                       <span
-                        className={`${value ? 'translate-x-6' : 'translate-x-1'
-                          } inline-block w-4 h-4 transform bg-white rounded-full`}
+                        className={`${
+                          value ? 'translate-x-6' : 'translate-x-1'
+                        } inline-block w-4 h-4 transform bg-white rounded-full`}
                       />
                     </Switch>
                   )}
@@ -366,7 +401,21 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
 
         <div className='pt-5'>
           <div className='flex justify-end'>
+            <ErrorMessage
+              errors={errors}
+              name='multipleErrorInput'
+              render={({ messages }) => {
+                console.log(messages);
+                return (
+                  messages &&
+                  Object.entries(messages).map(([type, message]) => (
+                    <p key={type}>{message}</p>
+                  ))
+                );
+              }}
+            />
             <button
+              id='product-submit'
               type='submit'
               className={classNames(
                 loading ? 'cursor-not-allowed animate-pulse' : '',
@@ -374,28 +423,11 @@ export default function Product({ categoryId = '', categoryName = '', handlePopu
               )}
             >
               Save
-              {loading && (
-                <span className='ml-1'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    className='h-6 w-6'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'
-                    />
-                  </svg>
-                </span>
-              )}
+              {loading && <LoaderSvg />}
             </button>
           </div>
         </div>
       </form>
     </>
   );
-};
+}

@@ -4,10 +4,12 @@ import { getCategories, searchProductsByName, updateBulkDiscount, updateBulkPric
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/solid'
 import { Combobox } from '@headlessui/react'
 import { debounce } from "lodash";
-import { getImageUrl } from "../../utils";
+import { classNames, getImageUrl } from "../../utils";
 import { XIcon } from "@heroicons/react/outline";
 import { useForm } from "react-hook-form";
-import { NotificationContext } from "../../Layout";
+import { NotificationContext, WindowWidthContext } from "../../Layout";
+import { ErrorMessage } from "@hookform/error-message";
+import LoaderSvg from "../../Components/LoaderSvg";
 
 const pages = [
   {
@@ -277,6 +279,16 @@ export default function BulkChange() {
                   </div>
                 </div>)}
                 <div className="mt-1 sm:mt-0">
+                  <ErrorMessage
+                    errors={errors}
+                    name="multipleErrorInput"
+                    render={({ messages }) =>
+                      messages &&
+                      Object.entries(messages).map(([type, message]) => (
+                        <p key={type}>{message}</p>
+                      ))
+                    }
+                  />
                   <button
                     type='submit'
                     className={classNames(
@@ -285,24 +297,7 @@ export default function BulkChange() {
                     )}
                   >
                     Update price
-                    {loading && (
-                      <span className='ml-1'>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          className='h-6 w-6'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'
-                          />
-                        </svg>
-                      </span>
-                    )}
+                    {loading && <LoaderSvg />}
                   </button>
                 </div>
               </div>
@@ -314,14 +309,11 @@ export default function BulkChange() {
   )
 }
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
-}
-
 function SearchWithDropdownSelector({ handleSelectedProducts }) {
   const [searchResult, setSearchResult] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const setNotificationState = useContext(NotificationContext);
+  const isMobile = useContext(WindowWidthContext);
   const handleSearch = debounce((searchTerm) => {
     if (searchTerm) {
       searchProductsByName({ query: searchTerm })
@@ -408,7 +400,7 @@ function SearchWithDropdownSelector({ handleSelectedProducts }) {
           >
             <div className="flex items-center">
               <img
-                src={product.productImages ? getImageUrl(product.productImages[0]) : getImageUrl()}
+                src={product.productImages ? getImageUrl(product.productImages[0], isMobile) : getImageUrl()}
                 alt={product.description}
                 className="h-6 w-6 flex-shrink-0 rounded-md" />
               <span className={classNames('ml-3 truncate')}>

@@ -227,3 +227,42 @@ export const removeFromCloudinary = (public_id) => {
       });
   });
 };
+
+export const getBanners = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`banners`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const addBanner = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`banners`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const deleteBanner = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`banners/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};

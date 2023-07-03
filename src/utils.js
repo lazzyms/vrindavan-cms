@@ -1,4 +1,5 @@
 import { Cloudinary } from "@cloudinary/url-gen";
+import { scale } from "@cloudinary/url-gen/actions/resize";
 
 const cld = new Cloudinary({
   cloud: {
@@ -11,9 +12,13 @@ const cld = new Cloudinary({
   }
 });
 
-export const getImageUrl = (publicId) => {
+export const getImageUrl = (publicId, mobile = false) => {
   if (!publicId) {
-    return cld.image('default.png').toURL()
+    return cld.image('default.webp').toURL()
   }
-  return cld.image(publicId).toURL()
+  return mobile ? cld.image(publicId).format('webp').quality('auto:best').resize(scale().width(400)).toURL() : cld.image(publicId).format('webp').quality('auto:best').toURL()
+}
+
+export function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
 }

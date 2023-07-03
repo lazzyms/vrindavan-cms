@@ -10,18 +10,16 @@ import {
   uploadToCloudinary
 } from '../../services';
 import { useNavigate, useParams } from 'react-router-dom';
-import { NotificationContext } from '../../Layout';
+import { NotificationContext, WindowWidthContext } from '../../Layout';
 import Breadcrumb from '../../Components/Breadcrumbs';
-import { getImageUrl } from '../../utils';
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ');
-}
+import { classNames, getImageUrl } from '../../utils';
+import { ErrorMessage } from '@hookform/error-message';
+import LoaderSvg from '../../Components/LoaderSvg';
 
 export default function CategoryForm() {
   const navigate = useNavigate();
   const { setNotificationState } = useContext(NotificationContext);
-
+  const isMobile = useContext(WindowWidthContext);
   const [categoryDetails, setCategoryDetails] = useState({});
   const [icon, setIcon] = useState('');
   const [cover, setCover] = useState('');
@@ -45,8 +43,8 @@ export default function CategoryForm() {
         .then((res) => {
           if (res.data.success) {
             setCategoryDetails(res.data.data);
-            setIcon(getImageUrl(res.data.data.icon));
-            setCover(getImageUrl(res.data.data.coverImage));
+            setIcon(getImageUrl(res.data.data.icon, isMobile));
+            setCover(getImageUrl(res.data.data.coverImage, isMobile));
             setEnabled(res.data.data.isVisible);
             setPages([
               {
@@ -385,6 +383,16 @@ export default function CategoryForm() {
 
         <div className='pt-5'>
           <div className='flex justify-end'>
+            <ErrorMessage
+              errors={errors}
+              name="multipleErrorInput"
+              render={({ messages }) =>
+                messages &&
+                Object.entries(messages).map(([type, message]) => (
+                  <p key={type}>{message}</p>
+                ))
+              }
+            />
             <button
               type='submit'
               className={classNames(
@@ -393,24 +401,7 @@ export default function CategoryForm() {
               )}
             >
               Save
-              {loading && (
-                <span className='ml-1'>
-                  <svg
-                    xmlns='http://www.w3.org/2000/svg'
-                    className='h-6 w-6'
-                    fill='none'
-                    viewBox='0 0 24 24'
-                    stroke='currentColor'
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      d='M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z'
-                    />
-                  </svg>
-                </span>
-              )}
+              {loading && <LoaderSvg />}
             </button>
           </div>
         </div>
