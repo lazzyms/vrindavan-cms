@@ -33,7 +33,7 @@ export default function Login() {
         }
       })
       .catch((err) => {
-        setRequestError(err.message);
+        setRequestError(err.response.data.error.message);
       });
   };
   return (
@@ -83,12 +83,19 @@ export default function Login() {
                     Login
                   </button>
                 </div>
-                {requestError && <div className="flex rounded-md bg-red-50 p-4">
-                  <div className="flex-shrink-0">
-                    <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
-                    <h3 className="text-sm font-medium text-red-800">{requestError}</h3>
+                {requestError && (
+                  <div className='flex rounded-md bg-red-50 p-4'>
+                    <div className='flex gap-2'>
+                      <XCircleIcon
+                        className='h-5 w-5 text-red-400'
+                        aria-hidden='true'
+                      />
+                      <h3 className='text-sm font-medium text-red-800'>
+                        {requestError}
+                      </h3>
+                    </div>
                   </div>
-                </div>}
+                )}
               </form>
             </div>
           </div>

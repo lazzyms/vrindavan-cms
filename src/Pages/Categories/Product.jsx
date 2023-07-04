@@ -192,7 +192,7 @@ export default function Product({
 
   return (
     <>
-      <Breadcrumb pages={pages} />
+      {/* <Breadcrumb pages={pages} /> */}
       <form
         className='space-y-8 divide-y divide-gray-200 overflow-auto'
         onSubmit={handleSubmit(onSubmit)}
