@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 export default function Breadcrumb({ pages }) {
 
   return (
-    <nav className="flex" aria-label="Breadcrumb">
+    <nav className="flex py-2" aria-label="Breadcrumb">
       <ol className="mx-auto flex w-full max-w-screen-xl space-x-4 ">
         {pages.map((page) => (
           <li key={page.name} className="flex">
