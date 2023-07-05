@@ -1,4 +1,4 @@
-import { getImageUrl } from '../utils';
+import { classNames, getImageUrl } from '../utils';
 import { EyeIcon, TrashIcon } from '@heroicons/react/outline';
 import ErrorBoundary from './ErrorBoundry';
 import ConfirmDialouge from './ConfirmDialouge';
@@ -23,7 +23,12 @@ export default function ProductCard({ product }) {
   };
   return (
     <div className='pt-4'>
-      <div className='flow-root rounded-lg bg-gray-50 shadow-md h-full'>
+      <div
+        className={classNames(
+          product.isVisible ? 'bg-gray-50' : 'bg-black/10',
+          'flow-root rounded-lg bg-gray-50 shadow-md h-full'
+        )}
+      >
         <div className='mx-4'>
           <img
             src={
