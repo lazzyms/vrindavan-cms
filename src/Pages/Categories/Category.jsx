@@ -36,7 +36,6 @@ export default function Category() {
   const [pages, setPages] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-
   const getFreshCategories = () => {
     getProductsByCategoryId(id, { page: pageNumber, limit: pageLimit })
       .then((res) => {
@@ -44,7 +43,6 @@ export default function Category() {
         if (res.data.success) {
           const newProducts = res.data.data.products;
           products[pageNumber - 1] = newProducts;
-          console.log(pageNumber, products);
           setProducts(products);
           setTotalPages(res.data.data.pages);
         }
@@ -105,6 +103,7 @@ export default function Category() {
   useEffect(() => {
     if (!insertForm) {
       setPageNumber(1);
+      setProducts([]);
     }
   }, [insertForm]);
 
@@ -119,6 +118,7 @@ export default function Category() {
     deleteProduct(pid).then((res) => {
       setProdDeleteModal(false);
       setPageNumber(1);
+      setProducts([]);
     });
   };
 
