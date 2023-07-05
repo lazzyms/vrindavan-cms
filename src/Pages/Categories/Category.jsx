@@ -1,12 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
-import { PlusIcon } from '@heroicons/react/solid';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon
+} from '@heroicons/react/outline';
+import { PlusIcon, ArrowCircleUpIcon } from '@heroicons/react/solid';
 import React, { useContext, useState } from 'react';
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import ConfirmDialouge from '../../Components/ConfirmDialouge';
 import ErrorBoundary from '../../Components/ErrorBoundry';
 import Popup from '../../Components/Popup';
+import { usePopper } from 'react-popper';
 import {
   deleteCategory,
   deleteProduct,
@@ -36,6 +40,14 @@ export default function Category() {
   const [pages, setPages] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [referenceElement, setReferenceElement] = useState(null);
+  const [popperElement, setPopperElement] = useState(null);
+  const [arrowElement, setArrowElement] = useState(null);
+  const { styles, attributes } = usePopper(referenceElement, popperElement, {
+    modifiers: [{ name: 'arrow', options: { element: arrowElement  } }],
+    placement: 'bottom-end'
+  });
+
   const getFreshCategories = () => {
     getProductsByCategoryId(id, { page: pageNumber, limit: pageLimit })
       .then((res) => {
@@ -167,6 +179,7 @@ export default function Category() {
               {categoryDetails.subCategories.length === 0 && (
                 <>
                   <button
+                    ref={setReferenceElement}
                     type='button'
                     className='h-full w-full flex items-center justify-center p-2 border border-transparent font-medium rounded-xl text-gray-600 bg-white hover:bg-gray-50 hover:shadow'
                     onClick={() => setInsertForm(true)}
@@ -186,7 +199,22 @@ export default function Category() {
                       />
                     }
                   />
-
+                  {!insertForm && products.length <= 0 && (
+                    <>
+                      <div
+                        ref={setPopperElement}
+                        style={styles.popper}
+                        {...attributes.popper}
+                      >
+                        <div ref={setArrowElement} style={styles.arrow}>
+                          <ArrowCircleUpIcon className='h-8 w-8 text-green-200 -mt-3' />
+                        </div>
+                        <p className='rounded-xl shadow-sm p-3 bg-green-200 mt-1 text-center text-gray-500'>
+                          Click to here to create product
+                        </p>
+                      </div>
+                    </>
+                  )}
                   <button
                     type='button'
                     className='h-full w-full text-red-500 items-center justify-center p-2 border border-transparent font-medium rounded-xl text-gray-600 bg-white hover:bg-gray-50 hover:shadow'

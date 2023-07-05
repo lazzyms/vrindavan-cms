@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import { NotificationContext, WindowWidthContext } from '../../Layout';
 import { Controller, useForm } from 'react-hook-form';
 import { Switch } from '@headlessui/react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   getProductsById,
   addOrUpdateProduct,
@@ -13,7 +13,6 @@ import {
 import { XCircleIcon } from '@heroicons/react/solid';
 import { classNames, getImageUrl } from '../../utils';
 import MarkDownInput from '../../Components/MarkDownInput';
-import { ErrorMessage } from '@hookform/error-message';
 import LoaderSvg from '../../Components/LoaderSvg';
 
 export default function Product({
@@ -22,7 +21,6 @@ export default function Product({
   productId = '',
   handlePopup
 }) {
-  const navigate = useNavigate();
   const pid = productId;
   const { setNotificationState } = useContext(NotificationContext);
   const isMobile = useContext(WindowWidthContext);
@@ -63,7 +61,7 @@ export default function Product({
   }, []);
 
   const [loading, setLoading] = useState(false);
-  const { register, handleSubmit, control, setValue, setError } = useForm();
+  const { register, handleSubmit, control, setValue } = useForm();
 
   useEffect(() => {
     setValue('name', productDetails?.name ?? '');
@@ -114,7 +112,6 @@ export default function Product({
         }
       })
       .catch((err) => {
-        console.log({ submit3: err });
         setLoading(false);
         setNotificationState({
           type: 'error',

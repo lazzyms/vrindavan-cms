@@ -65,7 +65,6 @@ export default function BannerForm() {
   } = useForm();
 
   const onSubmit = async (data) => {
-    console.log(data)
     setLoading(true);
     if (data.banner[0]) {
       const iconData = new FormData();

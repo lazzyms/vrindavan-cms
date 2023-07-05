@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getCategories } from '../../services';
 import Breadcrumb from '../../Components/Breadcrumbs';
-import { getImageUrl } from '../../utils';
 import { PlusCircleIcon } from '@heroicons/react/outline';
 import { NotificationContext } from '../../Layout';
 import CategoryCard from '../../Components/CategoryCard';
