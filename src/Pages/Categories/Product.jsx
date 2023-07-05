@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from 'react';
 import { NotificationContext, WindowWidthContext } from '../../Layout';
 import { Controller, useForm } from 'react-hook-form';
 import { Switch } from '@headlessui/react';
-import { useNavigate } from 'react-router-dom';
 import {
   getProductsById,
   addOrUpdateProduct,
@@ -17,7 +16,6 @@ import LoaderSvg from '../../Components/LoaderSvg';
 
 export default function Product({
   categoryId = '',
-  categoryName = '',
   productId = '',
   handlePopup
 }) {
@@ -68,6 +66,7 @@ export default function Product({
     setValue('description', productDetails?.description ?? '');
     setValue('price', productDetails?.price ?? '');
     setValue('isVisible', productDetails?.isVisible ?? '');
+    setValue('colors', productDetails?.colors ?? []);
   }, [productDetails]);
 
   const onSubmit = async (data) => {
@@ -92,7 +91,7 @@ export default function Product({
     } else {
       data.productImages = productDetails.productImages;
     }
-    data.colors = colors;
+    console.log(data);
     addOrUpdateProduct(data)
       .then((res) => {
         setLoading(false);
@@ -235,18 +234,11 @@ export default function Product({
                 <div className='mt-1 sm:mt-0 sm:col-span-2 flex item-center'>
                   {colors.map((color, index) => (
                     <div key={color + index} className='relative group'>
-                      <Controller
-                        name={`colors[${index}]`}
-                        control={control}
-                        render={({ field }) => (
-                          <input
-                            id='colors[]'
-                            type='color'
-                            defaultValue={color}
-                            className='my-auto h-8'
-                            {...field}
-                          />
-                        )}
+                      <input
+                        id={`colors[${index}]`}
+                        type='color'
+                        className='my-auto h-8'
+                        {...register(`colors[${index}]`)}
                       />
                       <button
                         className='absolute top-full left-0 right-0 text-gray-200 bg-red-900 rounded-md text-sm invisible group-hover:visible'
@@ -257,6 +249,7 @@ export default function Product({
                     </div>
                   ))}
                   <button
+                    type='button'
                     className='bg-white mx-1 py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none'
                     onClick={() => addNewColor()}
                   >
