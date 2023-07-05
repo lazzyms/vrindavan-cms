@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { PencilIcon } from '@heroicons/react/outline';
-import { EyeIcon, PlusIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/outline';
+import { PlusIcon } from '@heroicons/react/solid';
 import React, { useContext, useState } from 'react';
 import { useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -11,14 +11,16 @@ import {
   deleteCategory,
   deleteProduct,
   getCategoryDetails,
-  getProductsByCategoryId,
+  getProductsByCategoryId
 } from '../../services';
 import Product from './Product';
 import Breadcrumb from '../../Components/Breadcrumbs';
-import { getImageUrl } from '../../utils';
 import { NotificationContext } from '../../Layout';
 import CategoryCard from '../../Components/CategoryCard';
 import ProductCard from '../../Components/ProductCard';
+import { classNames } from '../../utils';
+
+const pageLimit = 6;
 
 export default function Category() {
   const { id } = useParams();
@@ -32,13 +34,19 @@ export default function Category() {
   const [deleteModal, setDeleteModal] = useState(false);
   const [prodDeleteModal, setProdDeleteModal] = useState(false);
   const [pages, setPages] = useState([]);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const getFreshCategories = () => {
-    getProductsByCategoryId(id)
+    getProductsByCategoryId(id, { page: pageNumber, limit: pageLimit })
       .then((res) => {
         setProductsLoading(false);
         if (res.data.success) {
-          setProducts(res.data.data);
+          const newProducts = res.data.data.products;
+          products[pageNumber - 1] = newProducts;
+          console.log(pageNumber, products);
+          setProducts(products);
+          setTotalPages(res.data.data.pages);
         }
       })
       .catch((err) => {
@@ -52,7 +60,14 @@ export default function Category() {
           show: true
         });
       });
-  }
+  };
+
+  useEffect(() => {
+    if (!products[pageNumber - 1]) {
+      setProductsLoading(true);
+      getFreshCategories();
+    }
+  }, [pageNumber]);
 
   useEffect(() => {
     getCategoryDetails(id)
@@ -71,7 +86,7 @@ export default function Category() {
               href: `/categories/${res.data.data._id}`,
               current: true
             }
-          ])
+          ]);
         }
       })
       .catch((err) => {
@@ -85,28 +100,27 @@ export default function Category() {
           show: true
         });
       });
-    getFreshCategories();
   }, [id]);
 
   useEffect(() => {
     if (!insertForm) {
-      getFreshCategories()
+      setPageNumber(1);
     }
-  }, [insertForm])
+  }, [insertForm]);
 
   const onDelete = (id) => {
     deleteCategory(id).then((res) => {
       setDeleteModal(false);
-      navigate('/')
+      navigate('/');
     });
   };
 
   const removeProduct = (pid) => {
     deleteProduct(pid).then((res) => {
       setProdDeleteModal(false);
-      getFreshCategories()
+      setPageNumber(1);
     });
-  }
+  };
 
   return (
     <div className=''>
@@ -164,7 +178,13 @@ export default function Category() {
                     heading='Add Product'
                     open={insertForm}
                     setOpen={setInsertForm}
-                    content={<Product categoryId={id} categoryName={categoryDetails.name} handlePopup={setInsertForm} />}
+                    content={
+                      <Product
+                        categoryId={id}
+                        categoryName={categoryDetails.name}
+                        handlePopup={setInsertForm}
+                      />
+                    }
                   />
 
                   <button
@@ -198,24 +218,82 @@ export default function Category() {
         </div>
       )}
       <div>
-        {productsLoading ? (
+        {productsLoading && !products[pageNumber - 1] ? (
           <div className='animate-pulse m-3 font-bold '>
-            <div className='h-full rounded'>
-              <div className='m-1 rounded'>Loading products....</div>
-              <div className='m-1 bg-gray-400 h-3 w-64 rounded'></div>
-              <div className='m-1 bg-gray-400 h-3 w-60 rounded'></div>
+            <div className='h-48 w-72 rounded'>
+              <div className='m-1 bg-gray-400 h-20 rounded'></div>
+              <div className='m-1 bg-gray-400 h-8 w-64 rounded'></div>
+              <div className='m-1 bg-gray-400 h-2 w-60 rounded'></div>
+              <div className='m-1 bg-gray-400 h-4 w-60 rounded border-t'></div>
             </div>
           </div>
         ) : (
-          <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
-            {products.length > 0 && products.map((product, i) => (
-              <ProductCard key={product._id} product={product} prodDeleteModal={prodDeleteModal} setProdDeleteModal={setProdDeleteModal} removeProduct={removeProduct} />
-            ))}
+          <div className='flex'>
+            <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+              {products[pageNumber - 1]?.length > 0 &&
+                products[pageNumber - 1].map((product, i) => (
+                  <ProductCard
+                    key={product._id + i}
+                    product={product}
+                    prodDeleteModal={prodDeleteModal}
+                    setProdDeleteModal={setProdDeleteModal}
+                    removeProduct={removeProduct}
+                  />
+                ))}
+            </div>
           </div>
         )}
       </div>
+      {totalPages > 1 && (
+        <nav className='mt-4 flex items-center justify-between border-gray-200 px-4 sm:px-0'>
+          <div className=' flex w-0 flex-1'>
+            <button
+              className={classNames(
+                pageNumber === 1 ? 'hidden' : 'inline-flex',
+                'items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              )}
+              onClick={() => setPageNumber(pageNumber - 1)}
+            >
+              <ArrowLeftIcon
+                className='mr-3 h-5 w-5 text-gray-400'
+                aria-hidden='true'
+              />
+              Previous
+            </button>
+          </div>
+          <div className='hidden md:-mt-px md:flex'>
+            {[...Array(totalPages).keys()].map((i) => (
+              <button
+                key={i}
+                onClick={() => setPageNumber(i + 1)}
+                className={classNames(
+                  i + 1 === pageNumber
+                    ? 'border-indigo-500 text-indigo-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                  'inline-flex items-center border-t-2 px-4 pt-1 text-sm font-medium'
+                )}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          <div className='-mt-px flex w-0 flex-1 justify-end'>
+            <button
+              className={classNames(
+                pageNumber === totalPages ? 'hidden' : 'inline-flex',
+                'items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
+              )}
+              onClick={() => setPageNumber(pageNumber + 1)}
+            >
+              Next
+              <ArrowRightIcon
+                className='ml-3 h-5 w-5 text-gray-400'
+                aria-hidden='true'
+              />
+            </button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }
-
-

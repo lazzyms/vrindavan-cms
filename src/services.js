@@ -98,10 +98,10 @@ export const addOrUpdateCategories = (data) => {
   });
 };
 
-export const getProductsByCategoryId = (id) => {
+export const getProductsByCategoryId = (id, params) => {
   return new Promise((resolve, reject) => {
     instance
-      .get(`categories/products/${id}`)
+      .get(`categories/products/${id}`, { params })
       .then((res) => {
         resolve(res);
       })
@@ -109,7 +109,7 @@ export const getProductsByCategoryId = (id) => {
         reject(err);
       });
   });
-}
+};
 
 export const addOrUpdateProduct = (data) => {
   return new Promise((resolve, reject) => {
@@ -135,7 +135,7 @@ export const getProductsById = (id) => {
         reject(err);
       });
   });
-}
+};
 
 export const deleteProduct = (id) => {
   return new Promise((resolve, reject) => {

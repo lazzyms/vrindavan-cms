@@ -10,7 +10,6 @@ import {
   uploadToCloudinary,
   removeFromCloudinary
 } from '../../services';
-import Breadcrumb from '../../Components/Breadcrumbs';
 import { XCircleIcon } from '@heroicons/react/solid';
 import { classNames, getImageUrl } from '../../utils';
 import MarkDownInput from '../../Components/MarkDownInput';
@@ -28,7 +27,7 @@ export default function Product({
   const { setNotificationState } = useContext(NotificationContext);
   const isMobile = useContext(WindowWidthContext);
   const [productDetails, setProductDetails] = useState(null);
-  const [pages, setPages] = useState([]);
+  const [errors, setErrors] = useState([]);
   const [colors, setColors] = useState([]);
   const [images, setImages] = useState([]);
 
@@ -38,7 +37,7 @@ export default function Product({
         .then((res) => {
           if (res.data.success) {
             const product = res.data.data;
-            setProductDetails(product);
+
             if (product.colors) {
               setColors(product.colors);
             }
@@ -47,23 +46,7 @@ export default function Product({
                 product.productImages.map((img) => getImageUrl(img, isMobile))
               );
             }
-            setPages([
-              {
-                name: 'Categories',
-                href: '/',
-                current: false
-              },
-              {
-                name: categoryName ? categoryName : product.categoryName,
-                href: `/categories/${product.categoryId}`,
-                current: false
-              },
-              {
-                name: 'Edit Product',
-                href: `/products/${pid}`,
-                current: true
-              }
-            ]);
+            setProductDetails(product);
           }
         })
         .catch((err) => {
@@ -80,14 +63,7 @@ export default function Product({
   }, []);
 
   const [loading, setLoading] = useState(false);
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-    watch,
-    setValue
-  } = useForm();
+  const { register, handleSubmit, control, setValue, setError } = useForm();
 
   useEffect(() => {
     setValue('name', productDetails?.name ?? '');
@@ -96,17 +72,10 @@ export default function Product({
     setValue('isVisible', productDetails?.isVisible ?? '');
   }, [productDetails]);
 
-  const watchAllFields = watch();
-
-  useEffect(() => {
-    console.log(watchAllFields);
-  }, [watchAllFields]);
-
   const onSubmit = async (data) => {
-    console.log('submit', data);
     data.categoryId = categoryId ? categoryId : productDetails.categoryId;
     setLoading(true);
-    if (data.productImages.length > 0) {
+    if (!pid && data.productImages.length > 0) {
       const files = Array.from(data.productImages);
       data.productImages = await Promise.all(
         files.map(async (img, i) => {
@@ -125,7 +94,6 @@ export default function Product({
     } else {
       data.productImages = productDetails.productImages;
     }
-    console.log(colors);
     data.colors = colors;
     addOrUpdateProduct(data)
       .then((res) => {
@@ -136,11 +104,7 @@ export default function Product({
             message: res.data.message,
             show: true
           });
-          if (pid) {
-            navigate(`/categories/${data.categoryId}`);
-          } else {
-            handlePopup(false);
-          }
+          handlePopup(false);
         } else {
           setNotificationState({
             type: 'error',
@@ -150,6 +114,7 @@ export default function Product({
         }
       })
       .catch((err) => {
+        console.log({ submit3: err });
         setLoading(false);
         setNotificationState({
           type: 'error',
@@ -190,12 +155,20 @@ export default function Product({
     setColors([...colors, '']);
   };
 
+  const onErrors = (errs) => {
+    const keys = Object.keys(errs);
+    setErrors(
+      keys.map((key) => {
+        return { key, message: errs[key].message };
+      })
+    );
+  };
+
   return (
     <>
-      {/* <Breadcrumb pages={pages} /> */}
       <form
         className='space-y-8 divide-y divide-gray-200 overflow-auto'
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(onSubmit, onErrors)}
       >
         <div className='space-y-8 divide-y divide-gray-200 sm:space-y-5'>
           <div>
@@ -313,7 +286,6 @@ export default function Product({
                         multiple
                         className='sr-only'
                         {...register('productImages', {
-                          required: true,
                           onChange: (e) => handleImageUpdate(e)
                         })}
                       />
@@ -401,19 +373,15 @@ export default function Product({
 
         <div className='pt-5'>
           <div className='flex justify-end'>
-            <ErrorMessage
-              errors={errors}
-              name='multipleErrorInput'
-              render={({ messages }) => {
-                console.log(messages);
-                return (
-                  messages &&
-                  Object.entries(messages).map(([type, message]) => (
-                    <p key={type}>{message}</p>
-                  ))
-                );
-              }}
-            />
+            <div className='text-sm text-red-500'>
+              {errors &&
+                errors.length > 0 &&
+                errors.map((error) => (
+                  <p key={error}>
+                    {error.key}:{error.message}
+                  </p>
+                ))}
+            </div>
             <button
               id='product-submit'
               type='submit'
