@@ -30,7 +30,7 @@ export default function BannerCard(props) {
         />
         <div className='absolute bottom-0 left-0 right-0 px-4 py-2 rounded-t-3xl bg-black/20'>
           <p className='text-md font-medium text-white drop-shadow text-center'>
-            {props.banner.categoryId?.name || 'Home'}
+            {props.banner.category?.name || 'Home'}
           </p>
         </div>
         <button
