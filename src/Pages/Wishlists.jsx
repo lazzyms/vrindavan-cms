@@ -17,7 +17,7 @@ const pages = [
 ];
 
 export default function Wishlists() {
-  const totalPages = 2;
+  const [totalPages, setTotalPages] = useState(1);
   const { setNotificationState } = useContext(NotificationContext);
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,8 @@ export default function Wishlists() {
       .then((res) => {
         setLoading(false);
         if (res.data.success) {
-          setWishlists(res.data.data);
+          setWishlists(res.data.data.items);
+          setTotalPages(res.data.data.pages)
         }
       })
       .catch((err) => {
