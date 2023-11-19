@@ -1,63 +1,64 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Layout from './Layout';
-import {
-  Category,
-  Login,
-  CategoryForm,
-  AllCategories
-} from './Pages';
-import Product from './Pages/Categories/Product';
-import BulkChange from './Pages/Categories/BulkChange';
-import Banners from './Pages/Banners';
-import BannerForm from './Pages/BannerForm';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./Layout";
+import { Category, Login, CategoryForm, AllCategories } from "./Pages";
+import Product from "./Pages/Categories/Product";
+import BulkChange from "./Pages/Categories/BulkChange";
+import Banners from "./Pages/Banners";
+import BannerForm from "./Pages/BannerForm";
+import Wishlists from "./Pages/Wishlists";
 
 const routes = [
   {
-    path: '/',
+    path: "/",
     exact: true,
-    component: <Layout view={<AllCategories />} />
+    component: <Layout view={<AllCategories />} />,
   },
   {
-    path: '/login',
+    path: "/login",
     exact: true,
-    component: <Login />
+    component: <Login />,
   },
   {
-    path: '/categories/:id',
+    path: "/categories/:id",
     exact: true,
-    component: <Layout view={<Category />} />
+    component: <Layout view={<Category />} />,
   },
   {
-    path: '/categories/new',
+    path: "/categories/new",
     exact: true,
-    component: <Layout view={<CategoryForm />} />
+    component: <Layout view={<CategoryForm />} />,
   },
   {
-    path: '/categories/edit/:id',
+    path: "/categories/edit/:id",
     exact: true,
-    component: <Layout view={<CategoryForm />} />
+    component: <Layout view={<CategoryForm />} />,
   },
   {
-    path: '/products/:pid',
+    path: "/products/:pid",
     exact: true,
-    component: <Layout view={<Product />} />
+    component: <Layout view={<Product />} />,
   },
   {
-    path: '/products/discount',
+    path: "/products/discount",
     exact: true,
-    component: <Layout view={<BulkChange />} />
+    component: <Layout view={<BulkChange />} />,
   },
   {
-    path: '/banners',
+    path: "/banners",
     exact: true,
-    component: <Layout view={<Banners />} />
+    component: <Layout view={<Banners />} />,
   },
   {
-    path: '/banners/new',
+    path: "/banners/new",
     exact: true,
-    component: <Layout view={<BannerForm />} />
-  }
+    component: <Layout view={<BannerForm />} />,
+  },
+  {
+    path: "/wishlists",
+    exact: true,
+    component: <Layout view={<Wishlists />} />,
+  },
 ];
 
 function App() {

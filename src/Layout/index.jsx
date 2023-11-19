@@ -13,7 +13,8 @@ import {
   LogoutIcon,
   MenuIcon,
   PhotographIcon,
-  XIcon
+  XIcon,
+  HeartIcon
 } from '@heroicons/react/outline';
 import Notification from '../Components/Notification';
 import { classNames } from '../utils';
@@ -57,6 +58,12 @@ export default function Layout({ view, heading }) {
       href: '/banners',
       icon: PhotographIcon,
       current: location.pathname === '/banners'
+    },
+    {
+      name: 'Wishlists',
+      href: '/wishlists',
+      icon: HeartIcon,
+      current: location.pathname === '/wishlists'
     }
   ];
   const width = window.matchMedia('(max-width: 400px)');
@@ -140,9 +147,9 @@ export default function Layout({ view, heading }) {
                     <div className='flex-1 h-0 pt-5 pb-4 overflow-y-auto'>
                       <div className='flex-shrink-0 flex items-center px-4'>
                         <img
-                          className='h-8 w-auto'
-                          src='https://tailwindui.com/img/logos/workflow-logo-indigo-500-mark-white-text.svg'
-                          alt='Workflow'
+                          className='w-full'
+                          src={Invert}
+                          alt='Vrindavan Furniture'
                         />
                       </div>
                       <nav className='mt-5 px-2 space-y-1'>
@@ -172,25 +179,16 @@ export default function Layout({ view, heading }) {
                       </nav>
                     </div>
                     <div className='flex-shrink-0 flex bg-gray-700 p-4'>
-                      <a href='#' className='flex-shrink-0 group block'>
-                        <div className='flex items-center'>
-                          <div>
-                            <img
-                              className='inline-block h-10 w-10 rounded-full'
-                              src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-                              alt=''
-                            />
-                          </div>
-                          <div className='ml-3'>
-                            <p className='text-base font-medium text-white'>
-                              Tom Cook
-                            </p>
-                            <p className='text-sm font-medium text-gray-400 group-hover:text-gray-300'>
-                              View profile
-                            </p>
-                          </div>
-                        </div>
-                      </a>
+                      <button
+                        className='flex items-center justify-start w-full px-4 py-2 text-sm font-medium rounded-md text-gray-300 hover:text-gray-100 hover:bg-gray-700 focus:outline-none focus:shadow-outline'
+                        onClick={() => handleLogout()}
+                      >
+                        <LogoutIcon
+                          className='text-gray-300 group-hover:text-gray-100 mr-3 flex-shrink-0 h-6 w-6'
+                          aria-hidden='true'
+                        />
+                        Logout
+                      </button>
                     </div>
                   </Dialog.Panel>
                 </Transition.Child>
@@ -206,6 +204,11 @@ export default function Layout({ view, heading }) {
             {/* Sidebar component, swap this element with another sidebar if you like */}
             <div className='flex-1 flex flex-col min-h-0 bg-gray-800'>
               <div className='flex-1 flex flex-col pt-2 pb-4 overflow-y-auto'>
+                <img
+                  className='w-full'
+                  src={Invert}
+                  alt='Vrindavan Furniture'
+                />
                 <nav className='mt-1 flex-1 px-2 space-y-1'>
                   {navigation.map((item) =>
                     !item.children ? (
@@ -286,11 +289,7 @@ export default function Layout({ view, heading }) {
                   )}
                 </nav>
                 <div className='grid grid-cols-1 px-4 pb-0'>
-                  <img
-                    className='w-full'
-                    src={Invert}
-                    alt='Vrindavan Furniture'
-                  />
+
                   <div className='m-1'>
                     <button
                       className='flex items-center justify-start w-full px-4 py-2 text-sm font-medium rounded-md text-gray-300 hover:text-gray-100 hover:bg-gray-700 focus:outline-none focus:shadow-outline'
@@ -325,8 +324,12 @@ export default function Layout({ view, heading }) {
                     <div className='py-4'>{view}</div>
                   </WindowWidthContext.Provider>
                 </div>
+
               </div>
             </main>
+            <footer className='fixed bottom-0 p-1 bg-white w-full'>
+              <p className='pl-2 text-gray-400'>CMS | Vrindavan Furniture</p>
+            </footer>
             <Notification {...notificationState} />
           </div>
         </div>

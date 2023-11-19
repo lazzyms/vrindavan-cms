@@ -9,7 +9,7 @@ import { WindowWidthContext } from '../Layout';
 import { useNavigate } from 'react-router-dom';
 import { deleteProduct } from '../services';
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, showControls = true }) {
   const navigate = useNavigate();
   const [insertForm, setInsertForm] = useState(false);
   const [prodDeleteModal, setProdDeleteModal] = useState(false);
@@ -26,7 +26,8 @@ export default function ProductCard({ product }) {
       <div
         className={classNames(
           product.isVisible ? 'bg-gray-50' : 'bg-black/10',
-          'flow-root rounded-lg bg-gray-50 shadow-md h-full'
+          'flow-root rounded-lg bg-gray-50  h-full',
+          showControls ? 'shadow-md' : 'border'
         )}
       >
         <div className='mx-4'>
@@ -60,35 +61,37 @@ export default function ProductCard({ product }) {
             </p>
           )}
         </div>
-        <div className='isolate inline-flex rounded-md w-full border-t'>
-          <button
-            type='button'
-            className='relative inline-flex items-center justify-center hover:shadow-md rounded-l-md px-2 py-2 text-sm font-semibold w-1/2 border-r'
-            onClick={() => setInsertForm(true)}
-          >
-            <EyeIcon className='h-6 w-6 text-gray-700' />
-            <span className='px-2 text-gray-700'>Edit</span>
-          </button>
-          <Popup
-            heading={
-              <>
-                Edit: <b>{product.name}</b>
-              </>
-            }
-            open={insertForm}
-            setOpen={setInsertForm}
-            content={
-              <Product handlePopup={setInsertForm} productId={product._id} />
-            }
-          />
-          <button
-            className='relative -ml-px inline-flex items-center justify-center hover:shadow-md rounded-r-md px-2 py-2 text-sm font-semibold w-1/2 border-l'
-            onClick={() => setProdDeleteModal(true)}
-          >
-            <TrashIcon className='h-6 w-6 text-red-400' />
-            <span className='px-2 text-red-400'>Delete</span>
-          </button>
-        </div>
+        {showControls &&
+          <div className='isolate inline-flex rounded-md w-full border-t'>
+            <button
+              type='button'
+              className='relative inline-flex items-center justify-center hover:shadow-md rounded-l-md px-2 py-2 text-sm font-semibold w-1/2 border-r'
+              onClick={() => setInsertForm(true)}
+            >
+              <EyeIcon className='h-6 w-6 text-gray-700' />
+              <span className='px-2 text-gray-700'>Edit</span>
+            </button>
+            <Popup
+              heading={
+                <>
+                  Edit: <b>{product.name}</b>
+                </>
+              }
+              open={insertForm}
+              setOpen={setInsertForm}
+              content={
+                <Product handlePopup={setInsertForm} productId={product._id} />
+              }
+            />
+            <button
+              className='relative -ml-px inline-flex items-center justify-center hover:shadow-md rounded-r-md px-2 py-2 text-sm font-semibold w-1/2 border-l'
+              onClick={() => setProdDeleteModal(true)}
+            >
+              <TrashIcon className='h-6 w-6 text-red-400' />
+              <span className='px-2 text-red-400'>Delete</span>
+            </button>
+          </div>
+        }
         <ErrorBoundary>
           <ConfirmDialouge
             id={product._id}

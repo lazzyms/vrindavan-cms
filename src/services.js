@@ -1,21 +1,25 @@
-import axios from 'axios';
+import axios from "axios";
 
 const instance = axios.create({
   baseURL: process.env.REACT_APP_API,
   headers: {
-    'Content-Type': 'application/json'
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 instance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      config.headers['x-access-token'] = token;
+      config.headers["x-access-token"] = token;
     }
     return config;
   },
   (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
     return Promise.reject(error);
   }
 );
@@ -26,8 +30,8 @@ instance.interceptors.response.use(
   },
   (error) => {
     if (error.response.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      localStorage.removeItem("token");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -194,15 +198,15 @@ export const uploadToCloudinary = (data) => {
     fetch(
       `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_NAME}/image/upload`,
       {
-        method: 'POST',
-        body: data
+        method: "POST",
+        body: data,
       }
     )
       .then((r) => {
         resolve(r.json());
       })
       .catch((err) => {
-        console.log('Cloudinary error', err);
+        console.log("Cloudinary error", err);
         reject(err);
       });
   });
@@ -213,16 +217,16 @@ export const removeFromCloudinary = (public_id) => {
     fetch(
       `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_NAME}/image/destroy`,
       {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({ public_id }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" },
       }
     )
       .then((r) => {
         resolve(r.json());
       })
       .catch((err) => {
-        console.log('Cloudinary error', err);
+        console.log("Cloudinary error", err);
         reject(err);
       });
   });
@@ -258,6 +262,32 @@ export const deleteBanner = (id) => {
   return new Promise((resolve, reject) => {
     instance
       .delete(`banners/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getAllWishlists = (page) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`wishlists?page=${page}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getAllWishlistsByUser = (page, data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`wishlistByUser?page=${page}`, data)
       .then((res) => {
         resolve(res);
       })

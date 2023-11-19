@@ -13,13 +13,15 @@ import { XCircleIcon } from '@heroicons/react/solid';
 import { classNames, getImageUrl } from '../../utils';
 import MarkDownInput from '../../Components/MarkDownInput';
 import LoaderSvg from '../../Components/LoaderSvg';
+import { useParams } from 'react-router';
 
 export default function Product({
   categoryId = '',
   productId = '',
   handlePopup
 }) {
-  const pid = productId;
+  let { pid } = useParams();
+  pid = productId ? productId : pid;
   const { setNotificationState } = useContext(NotificationContext);
   const isMobile = useContext(WindowWidthContext);
   const [productDetails, setProductDetails] = useState(null);
@@ -343,15 +345,13 @@ export default function Product({
                         productDetails ? productDetails.isVisible : true
                       }
                       onChange={onChange}
-                      className={`${
-                        value ? 'bg-indigo-600' : 'bg-gray-200'
-                      } relative inline-flex items-center h-6 rounded-full w-11`}
+                      className={`${value ? 'bg-indigo-600' : 'bg-gray-200'
+                        } relative inline-flex items-center h-6 rounded-full w-11`}
                     >
                       <span className='sr-only'>Show/Hide</span>
                       <span
-                        className={`${
-                          value ? 'translate-x-6' : 'translate-x-1'
-                        } inline-block w-4 h-4 transform bg-white rounded-full`}
+                        className={`${value ? 'translate-x-6' : 'translate-x-1'
+                          } inline-block w-4 h-4 transform bg-white rounded-full`}
                       />
                     </Switch>
                   )}
