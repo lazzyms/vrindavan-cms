@@ -21,6 +21,7 @@
     "node-sass": "^7.0.1",
     "postcss": "^8.4.13",
     "react": "^18.1.0",
+    "react-color": "^2.19.3",
     "react-dom": "^18.1.0",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.31.3",
