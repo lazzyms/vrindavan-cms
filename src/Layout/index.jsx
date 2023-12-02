@@ -15,6 +15,10 @@ import {
   PhotographIcon,
   XIcon,
   HeartIcon,
+  OfficeBuildingIcon,
+  ChatAltIcon,
+  QuestionMarkCircleIcon,
+  ViewListIcon,
 } from "@heroicons/react/outline";
 import Notification from "../Components/Notification";
 import { classNames } from "../utils";
@@ -64,6 +68,30 @@ export default function Layout({ view, heading }) {
       href: "/wishlists",
       icon: HeartIcon,
       current: location.pathname === "/wishlists",
+    },
+    {
+      name: "Orderes",
+      href: "/orders",
+      icon: ViewListIcon,
+      current: location.pathname === "/orders",
+    },
+    {
+      name: "Interiors",
+      href: "/interiors",
+      icon: OfficeBuildingIcon,
+      current: location.pathname === "/interiors",
+    },
+    {
+      name: "Testimonials",
+      href: "/testimonials",
+      icon: ChatAltIcon,
+      current: location.pathname === "/testimonials",
+    },
+    {
+      name: "User Queries",
+      href: "/queries",
+      icon: QuestionMarkCircleIcon,
+      current: location.pathname === "/queries",
     },
   ];
   const width = window.matchMedia("(max-width: 400px)");
@@ -325,7 +353,7 @@ export default function Layout({ view, heading }) {
                 </div>
               </div>
             </main>
-            <footer className="bg-white w-full">
+            <footer className="fixed bottom-0 bg-white w-full">
               <p className="pl-2 text-xs text-gray-400">
                 CMS | Vrindavan Furniture
               </p>

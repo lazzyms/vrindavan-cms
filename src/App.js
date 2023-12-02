@@ -59,6 +59,26 @@ const routes = [
     exact: true,
     component: <Layout view={<Wishlists />} />,
   },
+  {
+    path: "/interiors",
+    exact: true,
+    component: <Layout view={<>Coming soon...</>} />,
+  },
+  {
+    path: "/testimonials",
+    exact: true,
+    component: <Layout view={<>Coming soon...</>} />,
+  },
+  {
+    path: "/queries",
+    exact: true,
+    component: <Layout view={<>Coming soon...</>} />,
+  },
+  {
+    path: "/orders",
+    exact: true,
+    component: <Layout view={<>Coming soon...</>} />,
+  },
 ];
 
 function App() {
