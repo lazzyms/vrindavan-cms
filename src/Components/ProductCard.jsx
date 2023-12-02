@@ -44,9 +44,25 @@ export default function ProductCard({ product, showControls = true }) {
             <h3 className="mt-1 text-lg font-medium tracking-tight text-gray-900">
               {product.name}
             </h3>
-            <h3 className="mt-1 text-lg font-medium tracking-tight text-gray-800">
-              ₹{product.price}
-            </h3>
+            <div className="flex items-center gap-2 text-left">
+              <p className="font-light text-gray-900">
+                ₹
+                {(
+                  product.price -
+                  (product.price * product.discount) / 100
+                ).toLocaleString("en-IN")}
+              </p>
+              {product.discount > 0 && (
+                <div className="flex items-center gap-2 text-left">
+                  <p className="text-gray-500 font-thin line-through">
+                    ₹{product.price.toLocaleString("en-IN")}
+                  </p>
+                  <p className="font-light text-emerald-400">
+                    ({product.discount}% off)
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
           {product.description.replaceAll('"', "") ? (
             <div

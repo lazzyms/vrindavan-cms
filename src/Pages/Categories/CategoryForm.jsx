@@ -1,40 +1,40 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useContext, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Switch } from '@headlessui/react';
-import { useEffect } from 'react';
+import { useContext, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Switch } from "@headlessui/react";
+import { useEffect } from "react";
 import {
   addOrUpdateCategories,
   getCategories,
   getCategoryDetails,
-  uploadToCloudinary
-} from '../../services';
-import { useNavigate, useParams } from 'react-router-dom';
-import { NotificationContext, WindowWidthContext } from '../../Layout';
-import Breadcrumb from '../../Components/Breadcrumbs';
-import { classNames, getImageUrl } from '../../utils';
-import { ErrorMessage } from '@hookform/error-message';
-import LoaderSvg from '../../Components/LoaderSvg';
+  uploadToCloudinary,
+} from "../../services";
+import { useNavigate, useParams } from "react-router-dom";
+import { NotificationContext, WindowWidthContext } from "../../Layout";
+import Breadcrumb from "../../Components/Breadcrumbs";
+import { classNames, getImageUrl } from "../../utils";
+import { ErrorMessage } from "@hookform/error-message";
+import LoaderSvg from "../../Components/LoaderSvg";
 
 export default function CategoryForm() {
   const navigate = useNavigate();
   const { setNotificationState } = useContext(NotificationContext);
   const isMobile = useContext(WindowWidthContext);
   const [categoryDetails, setCategoryDetails] = useState({});
-  const [icon, setIcon] = useState('');
-  const [cover, setCover] = useState('');
+  const [icon, setIcon] = useState("");
+  const [cover, setCover] = useState("");
   const [enabled, setEnabled] = useState(false);
   const [pages, setPages] = useState([
     {
-      name: 'Categories',
-      href: '/',
-      current: false
+      name: "Categories",
+      href: "/",
+      current: false,
     },
     {
-      name: 'Add new',
+      name: "Add new",
       href: `/categories/new`,
-      current: true
-    }
+      current: true,
+    },
   ]);
   const { id } = useParams();
   useEffect(() => {
@@ -48,32 +48,32 @@ export default function CategoryForm() {
             setEnabled(res.data.data.isVisible);
             setPages([
               {
-                name: 'Categories',
-                href: '/',
-                current: false
+                name: "Categories",
+                href: "/",
+                current: false,
               },
               {
                 name: `Edit ${res.data.data.name}`,
                 href: `/categories/${id}`,
-                current: true
-              }
-            ])
+                current: true,
+              },
+            ]);
           } else {
             setNotificationState({
               message: res.data.message,
-              type: 'error',
-              show: true
+              type: "error",
+              show: true,
             });
           }
         })
         .catch((err) => {
           setNotificationState({
-            type: 'error',
+            type: "error",
             message:
               err.response.status === 400
                 ? err.response.data.error.message
                 : err.message,
-            show: true
+            show: true,
           });
         });
     }
@@ -91,12 +91,12 @@ export default function CategoryForm() {
       })
       .catch((err) => {
         setNotificationState({
-          type: 'error',
+          type: "error",
           message:
             err.response.status === 400
               ? err.response.data.error.message
               : err.message,
-          show: true
+          show: true,
         });
       });
   }, []);
@@ -105,7 +105,7 @@ export default function CategoryForm() {
     register,
     handleSubmit,
     control,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
 
   const onSubmit = async (data) => {
@@ -113,55 +113,57 @@ export default function CategoryForm() {
     const coverData = new FormData();
     if (data.icon[0]) {
       const iconData = new FormData();
-      iconData.append('file', data.icon[0]);
-      iconData.append('upload_preset', process.env.REACT_APP_CLOUDINARY_PRESET);
-      iconData.append('folder', 'category-icons/');
+      iconData.append("file", data.icon[0]);
+      iconData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_PRESET);
+      iconData.append("folder", "category-icons/");
       const icon = await uploadToCloudinary(iconData);
       data.icon = icon.public_id;
     } else if (id) {
       data.icon = categoryDetails.icon ? categoryDetails.icon : "";
     }
     if (data.coverImage[0]) {
-      coverData.append('file', data.coverImage[0]);
+      coverData.append("file", data.coverImage[0]);
       coverData.append(
-        'upload_preset',
+        "upload_preset",
         process.env.REACT_APP_CLOUDINARY_PRESET
       );
-      coverData.append('folder', 'category-cover/');
+      coverData.append("folder", "category-cover/");
       const cover = await uploadToCloudinary(coverData);
       data.coverImage = cover.public_id;
     } else if (id) {
-      data.coverImage = categoryDetails.coverImage ? categoryDetails.coverImage : "";
+      data.coverImage = categoryDetails.coverImage
+        ? categoryDetails.coverImage
+        : "";
     } else {
-      data.coverImage = '';
+      data.coverImage = "";
     }
     addOrUpdateCategories(data)
       .then((res) => {
         setLoading(false);
         if (res.data.success) {
           setNotificationState({
-            type: 'success',
+            type: "success",
             message: res.data.message,
-            show: true
+            show: true,
           });
-          navigate('/');
+          navigate("/");
         } else {
           setNotificationState({
-            type: 'success',
+            type: "success",
             message: res.data.message,
-            show: true
+            show: true,
           });
         }
       })
       .catch((err) => {
         setLoading(false);
         setNotificationState({
-          type: 'error',
+          type: "error",
           message:
             err.response.status === 400
               ? err.response.data.error.message
               : err.message,
-          show: true
+          show: true,
         });
       });
   };
@@ -171,7 +173,7 @@ export default function CategoryForm() {
       setIcon(URL.createObjectURL(e.target.files[0]));
     } else {
       URL.revokeObjectURL(icon);
-      setIcon('');
+      setIcon("");
     }
   };
   const handleCoverChange = (e) => {
@@ -179,197 +181,199 @@ export default function CategoryForm() {
       setCover(URL.createObjectURL(e.target.files[0]));
     } else {
       URL.revokeObjectURL(cover);
-      setCover('');
+      setCover("");
     }
   };
   return (
     <>
       <Breadcrumb pages={pages} />
       <form
-        className='space-y-8 divide-y divide-gray-200'
+        className="space-y-8 divide-y divide-gray-200"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className='space-y-8 divide-y divide-gray-200 sm:space-y-5'>
+        <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
           <div>
             {id && (
-              <input type='hidden' name='id' {...register('id')} value={id} />
+              <input type="hidden" name="id" {...register("id")} value={id} />
             )}
-            <div className='mt-6 sm:mt-5 space-y-6 sm:space-y-5'>
-              <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
+            <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor='username'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Name
                 </label>
-                <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                  <div className='max-w-lg flex rounded-md shadow-sm'>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
+                  <div className="max-w-lg flex rounded-md shadow-sm">
                     <input
-                      type='text'
-                      name='name'
-                      id='name'
-                      autoComplete='name'
+                      type="text"
+                      name="name"
+                      id="name"
+                      autoComplete="name"
                       defaultValue={categoryDetails.name}
-                      className='flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300'
-                      {...register('name', {
-                        required: true
+                      className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                      {...register("name", {
+                        required: true,
                       })}
-                      placeholder='Enter name of Product Category, e.g. Sofa'
+                      placeholder="Enter name of Product Category, e.g. Sofa"
                     />
                   </div>
                 </div>
               </div>
 
-              <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor='about'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
+                  htmlFor="about"
+                  className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Description
                 </label>
-                <div className='mt-1 sm:mt-0 sm:col-span-2'>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
                   <textarea
-                    id='description'
-                    name='description'
+                    id="description"
+                    name="description"
                     rows={3}
                     defaultValue={categoryDetails.description}
-                    className='max-w-lg shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md'
-                    placeholder='Enter a description of the category'
-                    {...register('description')}
+                    className="max-w-lg shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
+                    placeholder="Enter a description of the category"
+                    {...register("description")}
                   />
                 </div>
               </div>
 
-              <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5'>
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor='photo'
-                  className='block text-sm font-medium text-gray-700'
+                  htmlFor="photo"
+                  className="block text-sm font-medium text-gray-700"
                 >
                   Icon
                 </label>
-                <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                  <div className='flex items-center'>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
+                  <div className="flex items-center">
                     <label
-                      htmlFor='icon'
-                      className='bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                      htmlFor="icon"
+                      className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       <span>Upload Icon</span>
                       <input
-                        id='icon'
-                        name='icon'
-                        type='file'
-                        accept='image/*'
-                        className='sr-only'
+                        id="icon"
+                        name="icon"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
                         defaultValue={categoryDetails.icon}
-                        {...register('icon', {
+                        {...register("icon", {
                           required: true,
-                          onChange: (e) => handleIconChange(e)
+                          onChange: (e) => handleIconChange(e),
                         })}
                       />
                     </label>
                     {icon && (
                       <img
                         src={icon}
-                        alt='icon'
-                        className='m-2 w-16 h-16 object-contain'
+                        alt="icon"
+                        className="m-2 w-16 h-16 object-contain"
                       />
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor='cover-photo'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
+                  htmlFor="cover-photo"
+                  className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Cover Image
                 </label>
-                <div className='mt-1 sm:mt-0 sm:col-span-2'>
-                  <div className='flex items-center'>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
+                  <div className="flex items-center">
                     <label
-                      htmlFor='coverImage'
-                      className='bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none'
+                      htmlFor="coverImage"
+                      className="bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
                     >
                       <span>Upload Cover</span>
                       <input
-                        id='coverImage'
-                        name='coverImage'
-                        type='file'
-                        accept='image/*'
-                        className='sr-only'
+                        id="coverImage"
+                        name="coverImage"
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
                         defaultValue={categoryDetails.coverImage}
-                        {...register('coverImage', {
-                          onChange: (e) => handleCoverChange(e)
+                        {...register("coverImage", {
+                          onChange: (e) => handleCoverChange(e),
                         })}
                       />
                     </label>
                     {cover && (
                       <img
                         src={cover}
-                        alt='coverImage'
-                        className='m-2 w-32 h-16 object-contain'
+                        alt="coverImage"
+                        className="m-2 w-32 h-16 object-contain"
                       />
                     )}
                   </div>
                 </div>
               </div>
 
-              <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor='country'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
+                  htmlFor="country"
+                  className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Parent Category
                 </label>
-                <div className='mt-1 sm:mt-0 sm:col-span-2'>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
                   <select
-                    id='parentId'
-                    name='parentId'
-                    autoComplete='parent-category'
-                    className='max-w-lg block w-full shadow-sm sm:max-w-xs sm:text-sm border-gray-300 rounded-md'
-                    {...register('parentId')}
+                    id="parentId"
+                    name="parentId"
+                    autoComplete="parent-category"
+                    className="max-w-lg block w-full shadow-sm sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+                    {...register("parentId")}
                   >
-                    <option value=''>Select</option>
+                    <option value="">Select</option>
                     {parentCategories.map((item) => (
                       <option key={item._id} value={item._id}>
                         {item.name}
                       </option>
                     ))}
                   </select>
-                  <p className='mt-2 text-sm text-gray-500'>
+                  <p className="mt-2 text-sm text-gray-500">
                     Select only if adding sub-category
                   </p>
                 </div>
               </div>
 
-              <div className='sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5'>
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor='country'
-                  className='block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2'
+                  htmlFor="country"
+                  className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Visible
                 </label>
-                <div className='mt-1 sm:mt-0 sm:col-span-2'>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
                   <Controller
-                    name='isVisible'
+                    name="isVisible"
                     control={control}
-                    rules={{ onChange: setEnabled, value: enabled }}
-                    checked={enabled}
                     render={({ field }) => (
                       <Switch
                         {...field}
-                        checked={enabled}
+                        checked={field.value}
+                        onChange={(checked) => {
+                          field.onChange(checked);
+                          setEnabled(checked);
+                        }}
                         className={classNames(
-                          enabled ? 'bg-indigo-600' : 'bg-gray-200',
-                          'relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none'
+                          enabled ? "bg-indigo-600" : "bg-gray-200",
+                          "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none"
                         )}
                       >
                         <span
-                          aria-hidden='true'
+                          aria-hidden="true"
                           className={classNames(
-                            enabled ? 'translate-x-5' : 'translate-x-0',
-                            'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200'
+                            enabled ? "translate-x-5" : "translate-x-0",
+                            "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200"
                           )}
                         />
                       </Switch>
@@ -381,8 +385,8 @@ export default function CategoryForm() {
           </div>
         </div>
 
-        <div className='pt-5'>
-          <div className='flex justify-end'>
+        <div className="pt-5">
+          <div className="flex justify-end">
             <ErrorMessage
               errors={errors}
               name="multipleErrorInput"
@@ -394,10 +398,10 @@ export default function CategoryForm() {
               }
             />
             <button
-              type='submit'
+              type="submit"
               className={classNames(
-                loading ? 'cursor-not-allowed animate-pulse' : '',
-                'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none'
+                loading ? "cursor-not-allowed animate-pulse" : "",
+                "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
               )}
             >
               Save
