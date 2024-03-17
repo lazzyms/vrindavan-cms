@@ -37,11 +37,24 @@ export default function CategoryForm() {
     },
   ]);
   const { id } = useParams();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+    setValue,
+  } = useForm();
   useEffect(() => {
     if (id) {
       getCategoryDetails(id)
         .then((res) => {
           if (res.data.success) {
+            setValue("name", res.data.data.name);
+            // setValue("icon", categoryDetails.icon);
+            setValue("description", res.data.data.description);
+            // setValue("coverImage", res.data.data.coverImage);
+            setValue("isVisible", res.data.data.isVisible);
+            setValue("parentId", res.data.data.parentId);
             setCategoryDetails(res.data.data);
             setIcon(getImageUrl(res.data.data.icon, isMobile));
             setCover(getImageUrl(res.data.data.coverImage, isMobile));
@@ -101,17 +114,10 @@ export default function CategoryForm() {
       });
   }, []);
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm();
-
-  const onSubmit = async (data) => {
+  const onSubmit = async (data, e) => {
     setLoading(true);
     const coverData = new FormData();
-    if (data.icon[0]) {
+    if (Array.isArray(data.icon) && data.icon[0]) {
       const iconData = new FormData();
       iconData.append("file", data.icon[0]);
       iconData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_PRESET);
@@ -121,7 +127,7 @@ export default function CategoryForm() {
     } else if (id) {
       data.icon = categoryDetails.icon ? categoryDetails.icon : "";
     }
-    if (data.coverImage[0]) {
+    if (Array.isArray(data.coverImage) && data.coverImage[0]) {
       coverData.append("file", data.coverImage[0]);
       coverData.append(
         "upload_preset",
@@ -189,7 +195,7 @@ export default function CategoryForm() {
       <Breadcrumb pages={pages} />
       <form
         className="space-y-8 divide-y divide-gray-200"
-        onSubmit={handleSubmit(onSubmit)}
+        // onSubmit={handleSubmit(onSubmit)}
       >
         <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
           <div>
@@ -211,7 +217,7 @@ export default function CategoryForm() {
                       name="name"
                       id="name"
                       autoComplete="name"
-                      defaultValue={categoryDetails.name}
+                      // defaultValue={categoryDetails?.name}
                       className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
                       {...register("name", {
                         required: true,
@@ -234,7 +240,7 @@ export default function CategoryForm() {
                     id="description"
                     name="description"
                     rows={3}
-                    defaultValue={categoryDetails.description}
+                    // defaultValue={categoryDetails.description}
                     className="max-w-lg shadow-sm block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border border-gray-300 rounded-md"
                     placeholder="Enter a description of the category"
                     {...register("description")}
@@ -262,9 +268,9 @@ export default function CategoryForm() {
                         type="file"
                         accept="image/*"
                         className="sr-only"
-                        defaultValue={categoryDetails.icon}
+                        // defaultValue={categoryDetails.icon}
                         {...register("icon", {
-                          required: true,
+                          required: categoryDetails.icon ? false : true,
                           onChange: (e) => handleIconChange(e),
                         })}
                       />
@@ -300,7 +306,7 @@ export default function CategoryForm() {
                         type="file"
                         accept="image/*"
                         className="sr-only"
-                        defaultValue={categoryDetails.coverImage}
+                        // defaultValue={categoryDetails.coverImage}
                         {...register("coverImage", {
                           onChange: (e) => handleCoverChange(e),
                         })}
@@ -399,6 +405,7 @@ export default function CategoryForm() {
             />
             <button
               type="submit"
+              onClick={handleSubmit(onSubmit)}
               className={classNames(
                 loading ? "cursor-not-allowed animate-pulse" : "",
                 "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
