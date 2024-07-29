@@ -7,6 +7,8 @@ import BulkChange from "./Pages/Categories/BulkChange";
 import Banners from "./Pages/Banners";
 import BannerForm from "./Pages/BannerForm";
 import Wishlists from "./Pages/Wishlists";
+import Portfolio from "./Pages/Portfolios/Portfolio";
+import PortfolioForm from "./Pages/Portfolios/PortfolioForm";
 
 const routes = [
   {
@@ -60,9 +62,14 @@ const routes = [
     component: <Layout view={<Wishlists />} />,
   },
   {
-    path: "/interiors",
+    path: "/portfolio",
     exact: true,
-    component: <Layout view={<>Coming soon...</>} />,
+    component: <Layout view={<Portfolio />} />,
+  },
+  {
+    path: "/portfolio/new",
+    exact: true,
+    component: <Layout view={<PortfolioForm />} />,
   },
   {
     path: "/testimonials",

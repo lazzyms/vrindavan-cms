@@ -2,8 +2,7 @@
 import { Fragment, useContext, useEffect, useState } from "react";
 import { NotificationContext, WindowWidthContext } from "../../Layout";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { Dialog, Switch, Transition } from "@headlessui/react";
-import { SketchPicker } from "react-color";
+import { Switch } from "@headlessui/react";
 import {
   getProductsById,
   addOrUpdateProduct,
@@ -16,6 +15,7 @@ import MarkDownInput from "../../Components/MarkDownInput";
 import LoaderSvg from "../../Components/LoaderSvg";
 import { useParams } from "react-router";
 import ColorPicker from "../../Components/ColorPicker";
+import _, { difference, differenceBy } from "lodash";
 
 export default function Product({
   categoryId = "",
@@ -80,25 +80,39 @@ export default function Product({
   const onSubmit = async (data) => {
     data.categoryId = categoryId ? categoryId : productDetails.categoryId;
     setLoading(true);
-    if (!pid && data.productImages.length > 0) {
-      const files = Array.from(data.productImages);
-      data.productImages = await Promise.all(
-        files.map(async (img, i) => {
-          const productData = new FormData();
-          productData.append("file", img);
-          productData.append(
-            "upload_preset",
-            process.env.REACT_APP_CLOUDINARY_PRESET
-          );
-          productData.append("folder", `products/${data.categoryId}/`);
+    const files = Array.from(data.productImages || {});
+    const productImages = await Promise.all(
+      files.map(async (img, i) => {
+        const productData = new FormData();
+        productData.append("file", img);
+        productData.append(
+          "upload_preset",
+          process.env.REACT_APP_CLOUDINARY_PRESET
+        );
+        productData.append("folder", `products/${data.categoryId}/`);
 
-          const icon = await uploadToCloudinary(productData);
-          return icon.public_id;
-        })
+        const icon = await uploadToCloudinary(productData);
+        return icon.public_id;
+      })
+    );
+    data.productImages = productImages;
+    if (pid && productDetails.productImages.length > 0 && images.length > 0) {
+      const keptImageIds = images
+        .map((img) =>
+          _.find(productDetails.productImages, (item) => _.includes(img, item))
+        )
+        .filter(Boolean);
+      const removedImages = _.differenceBy(
+        productDetails.productImages,
+        keptImageIds
       );
-    } else {
-      data.productImages = productDetails.productImages;
+
+      if (removedImages.length > 0) {
+        await removeFromCloudinary(removedImages);
+      }
+      data.productImages = [...data.productImages, ...keptImageIds];
     }
+
     addOrUpdateProduct(data)
       .then((res) => {
         setLoading(false);
@@ -118,6 +132,7 @@ export default function Product({
         }
       })
       .catch((err) => {
+        // TODO remove images from cloudinary on error
         setLoading(false);
         setNotificationState({
           type: "error",
@@ -131,20 +146,19 @@ export default function Product({
   };
 
   const handleImageUpdate = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files);
-      setImages(files.map((file) => URL.createObjectURL(file)));
+    if (e.target.files) {
+      const targets = Array.prototype.slice.call(e.target.files);
+      const tempPictures = targets.map((file) => {
+        return URL.createObjectURL(file);
+      });
+      setImages([...tempPictures]);
     } else {
-      images.map((image) => URL.revokeObjectURL(image));
-      setImages([]);
+      images.forEach((picture) => URL.revokeObjectURL(picture));
+      setImages();
     }
   };
 
-  const removeImage = (url) => {
-    if (pid) {
-      const publicId = url.match(/\/v\d+\/(.+)\.\w{3,4}$/);
-      removeFromCloudinary(publicId[0]);
-    }
+  const removeImage = async (url) => {
     setImages(images.filter((img) => img !== url));
   };
 
@@ -328,27 +342,30 @@ export default function Product({
                         })}
                       />
                     </label>
-                    {images && images.length > 0 && (
-                      <div className="grid">
-                        {images.map((image, index) => (
-                          <div key={image} className="relative group">
-                            <img
-                              src={image}
-                              alt={image}
-                              className="m-2 w-32 object-contain rounded-md"
-                            />
-                            <button
-                              type="button"
-                              className="absolute top-0 right-0 text-gray-200 rounded-md text-sm invisible group-hover:visible"
-                              onClick={() => removeImage(image)}
-                            >
-                              <XCircleIcon className="h-6 w-6 text-red-800" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
+                  {images && images.length > 0 && (
+                    <div className="flex gap-4 overflow-x-auto">
+                      {images.map((image, index) => (
+                        <div
+                          key={image}
+                          className="flex-shrink-0 relative group"
+                        >
+                          <img
+                            src={image}
+                            alt={image}
+                            className="m-2 h-40 w-40 object-cover rounded-xl"
+                          />
+                          <button
+                            type="button"
+                            className="absolute top-0 right-0 text-gray-200 rounded-md text-sm invisible group-hover:visible"
+                            onClick={() => removeImage(image)}
+                          >
+                            <XCircleIcon className="h-6 w-6 text-red-800" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">

@@ -50,48 +50,57 @@ export default function Layout({ view, heading }) {
         location.pathname.startsWith("/categories") ||
         (location.pathname.startsWith("/products/") &&
           location.pathname !== "/products/discount"),
+      enabled: true,
     },
     {
       name: "Bulk Price change",
       href: "/products/discount",
       icon: AdjustmentsIcon,
       current: location.pathname === "/products/discount",
+      enabled: true,
     },
     {
       name: "Banners",
       href: "/banners",
       icon: PhotographIcon,
       current: location.pathname === "/banners",
+      enabled: true,
     },
     {
       name: "Wishlists",
       href: "/wishlists",
       icon: HeartIcon,
       current: location.pathname === "/wishlists",
+      enabled: true,
     },
     {
-      name: "Orderes",
+      name: "Portfolio",
+      href: "/portfolio",
+      icon: OfficeBuildingIcon,
+      current: location.pathname === "/portfolio",
+      enabled: true,
+    },
+    {
+      name: "Orders",
       href: "/orders",
       icon: ViewListIcon,
       current: location.pathname === "/orders",
+      enabled: false,
     },
-    {
-      name: "Interiors",
-      href: "/interiors",
-      icon: OfficeBuildingIcon,
-      current: location.pathname === "/interiors",
-    },
+
     {
       name: "Testimonials",
       href: "/testimonials",
       icon: ChatAltIcon,
       current: location.pathname === "/testimonials",
+      enabled: false,
     },
     {
       name: "User Queries",
       href: "/queries",
       icon: QuestionMarkCircleIcon,
       current: location.pathname === "/queries",
+      enabled: false,
     },
   ];
   const width = window.matchMedia("(max-width: 400px)");
@@ -189,6 +198,9 @@ export default function Layout({ view, heading }) {
                               item.current
                                 ? "bg-gray-900 text-white"
                                 : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                              item.enabled
+                                ? "cursor-pointer"
+                                : "cursor-not-allowed pointer-events-none",
                               "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                             )}
                           >
@@ -243,10 +255,14 @@ export default function Layout({ view, heading }) {
                       <Link
                         key={item.name}
                         to={item.href}
+                        data-tooltip-id="my-tooltip"
+                        data-tooltip-content="Hello world!"
+                        data-tooltip-place="top"
                         className={classNames(
                           item.current
                             ? "bg-gray-900 text-white"
                             : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                          item.enabled ? "" : "pointer-events-none",
                           "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                         )}
                       >
