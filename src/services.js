@@ -212,21 +212,14 @@ export const uploadToCloudinary = (data) => {
   });
 };
 
-export const removeFromCloudinary = (public_id) => {
+export const removeFromCloudinary = (public_ids) => {
   return new Promise((resolve, reject) => {
-    fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_NAME}/image/destroy`,
-      {
-        method: "POST",
-        body: JSON.stringify({ public_id }),
-        headers: { "Content-Type": "application/json" },
-      }
-    )
-      .then((r) => {
-        resolve(r.json());
+    instance
+      .delete(`asset`, { data: { public_ids } })
+      .then((res) => {
+        resolve(res);
       })
       .catch((err) => {
-        console.log("Cloudinary error", err);
         reject(err);
       });
   });
@@ -288,6 +281,58 @@ export const getAllWishlistsByUser = (page, data) => {
   return new Promise((resolve, reject) => {
     instance
       .post(`wishlistByUser?page=${page}`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const addOrUpdatePortfolio = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`portfolios`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getPortfolioById = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`portfolios/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getPortfolios = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`portfolios`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const deletePortfolioById = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`portfolios/${id}`)
       .then((res) => {
         resolve(res);
       })
