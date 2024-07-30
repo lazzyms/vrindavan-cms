@@ -19,6 +19,7 @@ import { classNames, getImageUrl } from "../../utils";
 import { Switch } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/outline";
 import _ from "lodash";
+import MarkDownInput from "../../Components/MarkDownInput";
 
 export default function PortfolioForm() {
   let { pid } = useParams();
@@ -31,7 +32,7 @@ export default function PortfolioForm() {
   const [pictures, setPictures] = useState([]);
   useEffect(() => {
     if (pid) {
-      getPortfolioById
+      getPortfolioById(pid)
         .then((res) => {
           if (res.data.success) {
             const portfolio = res.data.data;
@@ -58,7 +59,7 @@ export default function PortfolioForm() {
           });
         });
     }
-  }, []);
+  }, [pid]);
 
   const [pages] = useState([
     {
@@ -74,14 +75,20 @@ export default function PortfolioForm() {
   ]);
 
   const [loading, setLoading] = useState(false);
-  const [enabled, setEnabled] = useState(false);
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
+    setValue,
   } = useForm();
+
+  useEffect(() => {
+    setValue("title", portfolio?.title ?? "");
+    setValue("description", portfolio?.description ?? "");
+    setValue("isVisible", portfolio?.isVisible ?? "");
+  }, [portfolio]);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -193,7 +200,7 @@ export default function PortfolioForm() {
             <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
               <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor="username"
+                  htmlFor="title"
                   className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Title
@@ -216,58 +223,52 @@ export default function PortfolioForm() {
               </div>
               <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor="username"
+                  htmlFor="description"
                   className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
                   Description
                 </label>
                 <div className="mt-1 sm:mt-0 sm:col-span-2">
-                  <div className="max-w-lg flex rounded-md shadow-sm">
-                    <input
-                      type="text"
-                      name="description"
-                      id="description"
-                      autoComplete="description"
-                      className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                      {...register("description", {
-                        required: true,
-                      })}
-                      placeholder="Enter short description"
-                    />
-                  </div>
+                  <Controller
+                    control={control}
+                    name="description"
+                    render={({ field }) => (
+                      <MarkDownInput
+                        id="description"
+                        {...field}
+                        defaultValue={portfolio && portfolio.description}
+                      />
+                    )}
+                  />
                 </div>
               </div>
 
               <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                 <label
-                  htmlFor="country"
+                  htmlFor="isVisible"
                   className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
                 >
-                  Visible
+                  Show/Hide
                 </label>
                 <div className="mt-1 sm:mt-0 sm:col-span-2">
                   <Controller
+                    id="isVisible"
                     name="isVisible"
                     control={control}
-                    render={({ field }) => (
+                    render={({ field: { value, onChange } }) => (
                       <Switch
-                        {...field}
-                        checked={field.value}
-                        onChange={(checked) => {
-                          field.onChange(checked);
-                          setEnabled(checked);
-                        }}
-                        className={classNames(
-                          enabled ? "bg-indigo-600" : "bg-gray-200",
-                          "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none"
-                        )}
+                        checked={value}
+                        defaultChecked={portfolio ? portfolio.isVisible : true}
+                        onChange={onChange}
+                        className={`${
+                          value ? "bg-indigo-600" : "bg-gray-200"
+                        } relative inline-flex items-center h-6 rounded-full w-11`}
                       >
+                        <span className="sr-only">Show/Hide</span>
                         <span
-                          aria-hidden="true"
-                          className={classNames(
-                            enabled ? "translate-x-5" : "translate-x-0",
-                            "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition ease-in-out duration-200"
-                          )}
+                          className={`${
+                            value ? "translate-x-6" : "translate-x-1"
+                          } inline-block w-4 h-4 transform bg-white rounded-full`}
                         />
                       </Switch>
                     )}

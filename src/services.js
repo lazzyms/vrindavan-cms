@@ -315,3 +315,29 @@ export const getPortfolioById = (id) => {
       });
   });
 };
+
+export const getPortfolios = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`portfolios`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const deletePortfolioById = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`portfolios/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};

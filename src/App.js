@@ -72,6 +72,11 @@ const routes = [
     component: <Layout view={<PortfolioForm />} />,
   },
   {
+    path: "/portfolio/edit/:pid",
+    exact: true,
+    component: <Layout view={<PortfolioForm />} />,
+  },
+  {
     path: "/testimonials",
     exact: true,
     component: <Layout view={<>Coming soon...</>} />,

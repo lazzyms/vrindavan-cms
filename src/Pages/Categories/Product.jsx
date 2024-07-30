@@ -15,7 +15,7 @@ import MarkDownInput from "../../Components/MarkDownInput";
 import LoaderSvg from "../../Components/LoaderSvg";
 import { useParams } from "react-router";
 import ColorPicker from "../../Components/ColorPicker";
-import _, { difference, differenceBy } from "lodash";
+import _ from "lodash";
 
 export default function Product({
   categoryId = "",
@@ -248,13 +248,6 @@ export default function Product({
                   Description
                 </span>
                 <div className="mt-1 sm:mt-0 sm:col-span-2">
-                  {/* <input
-                      type='text'
-                      id='description'
-                      className='text-input'
-                      {...register('description')}
-                      placeholder='Enter description of Product Category'
-                    /> */}
                   <Controller
                     control={control}
                     name="description"
