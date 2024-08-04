@@ -117,7 +117,7 @@ export default function CategoryForm() {
   const onSubmit = async (data, e) => {
     setLoading(true);
     const coverData = new FormData();
-    if (Array.isArray(data.icon) && data.icon[0]) {
+    if (data.icon[0]) {
       const iconData = new FormData();
       iconData.append("file", data.icon[0]);
       iconData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_PRESET);
@@ -127,7 +127,7 @@ export default function CategoryForm() {
     } else if (id) {
       data.icon = categoryDetails.icon ? categoryDetails.icon : "";
     }
-    if (Array.isArray(data.coverImage) && data.coverImage[0]) {
+    if (data.coverImage[0]) {
       coverData.append("file", data.coverImage[0]);
       coverData.append(
         "upload_preset",

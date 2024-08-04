@@ -112,7 +112,8 @@ export default function Category() {
   useEffect(() => {
     if (!insertForm) {
       setPageNumber(1);
-      setProducts([]);
+      // setProducts([]);
+      getFreshCategories();
     }
   }, [insertForm]);
 
