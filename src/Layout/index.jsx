@@ -81,18 +81,17 @@ export default function Layout({ view, heading }) {
       enabled: true,
     },
     {
-      name: "Orders",
-      href: "/orders",
-      icon: ViewListIcon,
-      current: location.pathname === "/orders",
-      enabled: false,
-    },
-
-    {
       name: "Testimonials",
       href: "/testimonials",
       icon: ChatAltIcon,
       current: location.pathname === "/testimonials",
+      enabled: true,
+    },
+    {
+      name: "Orders",
+      href: "/orders",
+      icon: ViewListIcon,
+      current: location.pathname === "/orders",
       enabled: false,
     },
     {
