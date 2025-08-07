@@ -3,8 +3,8 @@ import { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useEffect } from "react";
 import {
-  addOrUpdatePortfolio,
-  getPortfolioById,
+  addOrUpdateTestimonial,
+  getTestimonialById,
   removeFromCloudinary,
   uploadToCloudinary,
 } from "../../services";
@@ -18,57 +18,56 @@ import { Switch } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/outline";
 import _ from "lodash";
 import MarkDownInput from "../../Components/MarkDownInput";
-import { SearchWithDropdownSelector } from "../Categories/BulkChange";
 
-export default function PortfolioForm() {
-  let { pid } = useParams();
+export default function TestimonialForm() {
+  let { tid } = useParams();
   const navigate = useNavigate();
   const { setNotificationState } = useContext(NotificationContext);
   const isMobile = useContext(WindowWidthContext);
 
-  const [portfolio, setPortfolio] = useState({});
+  const [testimonial, setTestimonial] = useState({});
   const [cover, setCover] = useState("");
   const [pictures, setPictures] = useState([]);
   useEffect(() => {
-    if (pid) {
-      getPortfolioById(pid)
+    if (tid) {
+      getTestimonialById(tid)
         .then((res) => {
           if (res.data.success) {
-            const portfolio = res.data.data;
+            const testimonial = res.data.data;
 
-            if (portfolio.pictures.length > 0) {
+            if (testimonial.pictures && testimonial.pictures.length > 0) {
               setPictures(
-                portfolio.pictures.map((img) => getImageUrl(img, isMobile))
+                testimonial.pictures.map((img) => getImageUrl(img, isMobile))
               );
             }
-            if (portfolio.coverImage) {
-              setCover(getImageUrl(portfolio.coverImage, isMobile));
+            if (testimonial.coverImage) {
+              setCover(getImageUrl(testimonial.coverImage, isMobile));
             }
-            setPortfolio(portfolio);
+            setTestimonial(testimonial);
           }
         })
         .catch((err) => {
           setNotificationState({
             type: "error",
             message:
-              err.response.status === 400
+              err.response && err.response.status === 400
                 ? err.response.data.error.message
                 : err.message,
             show: true,
           });
         });
     }
-  }, [pid]);
+  }, [tid]);
 
   const [pages] = useState([
     {
-      name: "Portfolio",
-      href: "/portfolio",
+      name: "Testimonials",
+      href: "/testimonials",
       current: false,
     },
     {
-      name: pid ? "Edit site" : "Add new site",
-      href: pid ? `/portfolio/${pid}` : `portfolio/new`,
+      name: tid ? "Edit testimonial" : "Add new testimonial",
+      href: tid ? `/testimonials/${tid}` : `/testimonials/new`,
       current: true,
     },
   ]);
@@ -84,50 +83,50 @@ export default function PortfolioForm() {
   } = useForm();
 
   useEffect(() => {
-    // handle form errors if needed
-  }, [errors]);
-
-  useEffect(() => {
-    setValue("title", portfolio?.title ?? "");
-    setValue("description", portfolio?.description ?? "");
-    setValue("isVisible", portfolio?.isVisible ?? "");
-    // setValue("coverImage", portfolio?.coverImage ?? "");
-  }, [portfolio, setValue]);
+    setValue("title", testimonial?.title ?? "");
+    setValue("description", testimonial?.description ?? "");
+    setValue("isVisible", testimonial?.isVisible ?? "");
+  }, [testimonial]);
 
   const onSubmit = async (data) => {
     setLoading(true);
     data.slug = data.title.toLowerCase().replace(/ /g, "-");
-    if (data.coverImage[0]) {
+    if (data.coverImage && data.coverImage[0]) {
       const iconData = new FormData();
       iconData.append("file", data.coverImage[0]);
       iconData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_PRESET);
-      iconData.append("folder", `portfolio/${data.slug}/cover/`);
+      iconData.append("folder", `testimonials/${data.slug}/cover/`);
       const icon = await uploadToCloudinary(iconData);
       data.coverImage = icon.public_id;
     }
 
     const files = Array.from(data.pictures || {});
-    const productImages = await Promise.all(
+    const testimonialImages = await Promise.all(
       files.map(async (img, i) => {
-        const productData = new FormData();
-        productData.append("file", img);
-        productData.append(
+        const testimonialData = new FormData();
+        testimonialData.append("file", img);
+        testimonialData.append(
           "upload_preset",
           process.env.REACT_APP_CLOUDINARY_PRESET
         );
-        productData.append("folder", `portfolio/${data.slug}/`);
-        const icon = await uploadToCloudinary(productData);
+        testimonialData.append("folder", `testimonials/${data.slug}/`);
+        const icon = await uploadToCloudinary(testimonialData);
         return icon.public_id;
       })
     );
-    data.pictures = productImages;
-    if (pid && portfolio.pictures.length > 0 && pictures.length > 0) {
+    data.pictures = testimonialImages;
+    if (
+      tid &&
+      testimonial.pictures &&
+      testimonial.pictures.length > 0 &&
+      pictures.length > 0
+    ) {
       const keptImageIds = pictures
         .map((img) =>
-          _.find(portfolio.pictures, (item) => _.includes(img, item))
+          _.find(testimonial.pictures, (item) => _.includes(img, item))
         )
         .filter(Boolean);
-      const removedImages = _.differenceBy(portfolio.pictures, keptImageIds);
+      const removedImages = _.difference(testimonial.pictures, keptImageIds);
 
       if (removedImages.length > 0) {
         await removeFromCloudinary(removedImages);
@@ -135,11 +134,7 @@ export default function PortfolioForm() {
       data.pictures = [...data.pictures, ...keptImageIds];
     }
 
-    if (searchProducts.length > 0) {
-      data.products = searchProducts;
-    }
-
-    addOrUpdatePortfolio(data)
+    addOrUpdateTestimonial(data)
       .then((res) => {
         setLoading(false);
         if (res.data.success) {
@@ -148,10 +143,10 @@ export default function PortfolioForm() {
             message: res.data.message,
             show: true,
           });
-          navigate("/portfolio/");
+          navigate("/testimonials/");
         } else {
           setNotificationState({
-            type: "success",
+            type: "error",
             message: res.data.message,
             show: true,
           });
@@ -163,7 +158,7 @@ export default function PortfolioForm() {
         setNotificationState({
           type: "error",
           message:
-            err.response.status === 400
+            err.response && err.response.status === 400
               ? err.response.data.error.message
               : err.message,
           show: true,
@@ -196,9 +191,6 @@ export default function PortfolioForm() {
   const removePic = (url) => {
     setPictures(pictures.filter((img) => img !== url));
   };
-
-  const [searchProducts, setSearchProducts] = useState([]);
-
   return (
     <>
       <Breadcrumb pages={pages} />
@@ -247,7 +239,7 @@ export default function PortfolioForm() {
                       <MarkDownInput
                         id="description"
                         {...field}
-                        defaultValue={portfolio && portfolio.description}
+                        defaultValue={testimonial && testimonial.description}
                       />
                     )}
                   />
@@ -269,7 +261,9 @@ export default function PortfolioForm() {
                     render={({ field: { value, onChange } }) => (
                       <Switch
                         checked={value}
-                        defaultChecked={portfolio ? portfolio.isVisible : true}
+                        defaultChecked={
+                          testimonial ? testimonial.isVisible : true
+                        }
                         onChange={onChange}
                         className={`${
                           value ? "bg-indigo-600" : "bg-gray-200"
@@ -307,6 +301,7 @@ export default function PortfolioForm() {
                         accept="image/*"
                         className="sr-only"
                         {...register("coverImage", {
+                          required: "Cover image is required",
                           onChange: (e) => handleCoverChange(e),
                         })}
                       />
@@ -343,6 +338,7 @@ export default function PortfolioForm() {
                         multiple
                         className="sr-only"
                         {...register("pictures", {
+                          required: "Picture is required",
                           onChange: (e) => handlePicturesChange(e),
                         })}
                       />
@@ -371,20 +367,6 @@ export default function PortfolioForm() {
                       ))}
                     </div>
                   )}
-                </div>
-              </div>
-
-              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
-                >
-                  Search Products
-                </label>
-                <div className="mt-1 sm:mt-0 sm:col-span-2">
-                  <SearchWithDropdownSelector
-                    handleSelectedProducts={setSearchProducts}
-                  />
                 </div>
               </div>
             </div>
