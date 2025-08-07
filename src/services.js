@@ -346,7 +346,7 @@ export const deletePortfolioById = (id) => {
 export const getAdmins = (params = {}) => {
   return new Promise((resolve, reject) => {
     instance
-      .get(`admin/admins`, { params })
+      .get(`admins`, { params })
       .then((res) => {
         resolve(res);
       })
@@ -359,7 +359,7 @@ export const getAdmins = (params = {}) => {
 export const createAdmin = (data) => {
   return new Promise((resolve, reject) => {
     instance
-      .post(`admin/admins`, data)
+      .post(`admins`, data)
       .then((res) => {
         resolve(res);
       })
@@ -372,7 +372,7 @@ export const createAdmin = (data) => {
 export const updateAdmin = (id, data) => {
   return new Promise((resolve, reject) => {
     instance
-      .put(`admin/admins/${id}`, data)
+      .put(`admins/${id}`, data)
       .then((res) => {
         resolve(res);
       })
@@ -385,7 +385,7 @@ export const updateAdmin = (id, data) => {
 export const removeAdmin = (id) => {
   return new Promise((resolve, reject) => {
     instance
-      .delete(`admin/admins/${id}`)
+      .delete(`admins/${id}`)
       .then((res) => {
         resolve(res);
       })
