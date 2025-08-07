@@ -107,7 +107,10 @@ export default function Login() {
                 <div className="m-3">
                   <button
                     type="button"
-                    onClick={handleSubmit(onSubmit)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSubmit(onSubmit);
+                    }}
                     disabled={loader}
                     className={classNames(
                       loader
