@@ -19,6 +19,8 @@ import {
   ChatAltIcon,
   QuestionMarkCircleIcon,
   ViewListIcon,
+  UsersIcon,
+  KeyIcon,
 } from "@heroicons/react/outline";
 import Notification from "../Components/Notification";
 import { classNames } from "../utils";
@@ -39,6 +41,7 @@ export default function Layout({ view, heading }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const userRole = localStorage.getItem("role");
 
   const navigation = [
     {
@@ -100,6 +103,20 @@ export default function Layout({ view, heading }) {
       icon: QuestionMarkCircleIcon,
       current: location.pathname === "/queries",
       enabled: false,
+    },
+    {
+      name: "Admin Management",
+      href: "/admins",
+      icon: UsersIcon,
+      current: location.pathname.startsWith("/admins"),
+      enabled: userRole === "SUPERADMIN",
+    },
+    {
+      name: "Change Password",
+      href: "/change-password",
+      icon: KeyIcon,
+      current: location.pathname === "/change-password",
+      enabled: true,
     },
   ];
   const width = window.matchMedia("(max-width: 400px)");
@@ -189,32 +206,34 @@ export default function Layout({ view, heading }) {
                         />
                       </div>
                       <nav className="mt-5 px-2 space-y-1">
-                        {navigation.map((item) => (
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            className={classNames(
-                              item.current
-                                ? "bg-gray-900 text-white"
-                                : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                              item.enabled
-                                ? "cursor-pointer"
-                                : "cursor-not-allowed pointer-events-none",
-                              "group flex items-center px-2 py-2 text-base font-medium rounded-md"
-                            )}
-                          >
-                            <item.icon
+                        {navigation
+                          .filter((item) => item.enabled)
+                          .map((item) => (
+                            <a
+                              key={item.name}
+                              href={item.href}
                               className={classNames(
                                 item.current
-                                  ? "text-gray-300"
-                                  : "text-gray-400 group-hover:text-gray-300",
-                                "mr-4 flex-shrink-0 h-6 w-6"
+                                  ? "bg-gray-900 text-white"
+                                  : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                                item.enabled
+                                  ? "cursor-pointer"
+                                  : "cursor-not-allowed pointer-events-none",
+                                "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                               )}
-                              aria-hidden="true"
-                            />
-                            {item.name}
-                          </a>
-                        ))}
+                            >
+                              <item.icon
+                                className={classNames(
+                                  item.current
+                                    ? "text-gray-300"
+                                    : "text-gray-400 group-hover:text-gray-300",
+                                  "mr-4 flex-shrink-0 h-6 w-6"
+                                )}
+                                aria-hidden="true"
+                              />
+                              {item.name}
+                            </a>
+                          ))}
                       </nav>
                     </div>
                     <div className="flex-shrink-0 flex bg-gray-700 p-4">
@@ -249,87 +268,89 @@ export default function Layout({ view, heading }) {
                   alt="Vrindavan Furniture"
                 />
                 <nav className="mt-1 flex-1 px-2 space-y-1">
-                  {navigation.map((item) =>
-                    !item.children ? (
-                      <Link
-                        key={item.name}
-                        to={item.href}
-                        data-tooltip-id="my-tooltip"
-                        data-tooltip-content="Hello world!"
-                        data-tooltip-place="top"
-                        className={classNames(
-                          item.current
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                          item.enabled ? "" : "pointer-events-none",
-                          "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                        )}
-                      >
-                        <item.icon
+                  {navigation
+                    .filter((item) => item.enabled)
+                    .map((item) =>
+                      !item.children ? (
+                        <Link
+                          key={item.name}
+                          to={item.href}
+                          data-tooltip-id="my-tooltip"
+                          data-tooltip-content="Hello world!"
+                          data-tooltip-place="top"
                           className={classNames(
                             item.current
-                              ? "text-gray-300"
-                              : "text-gray-400 group-hover:text-gray-300",
-                            "mr-3 flex-shrink-0 h-6 w-6"
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            item.enabled ? "" : "pointer-events-none",
+                            "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                           )}
-                          aria-hidden="true"
-                        />
-                        {item.name}
-                      </Link>
-                    ) : (
-                      <Disclosure
-                        as="div"
-                        key={item.name}
-                        className="space-y-1"
-                      >
-                        {({ open }) => (
-                          <>
-                            <Disclosure.Button
-                              className={classNames(
-                                item.current
-                                  ? "text-white"
-                                  : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                                "group w-full flex items-center pr-2 py-2 text-left text-sm font-medium rounded-md"
-                              )}
-                            >
-                              <svg
+                        >
+                          <item.icon
+                            className={classNames(
+                              item.current
+                                ? "text-gray-300"
+                                : "text-gray-400 group-hover:text-gray-300",
+                              "mr-3 flex-shrink-0 h-6 w-6"
+                            )}
+                            aria-hidden="true"
+                          />
+                          {item.name}
+                        </Link>
+                      ) : (
+                        <Disclosure
+                          as="div"
+                          key={item.name}
+                          className="space-y-1"
+                        >
+                          {({ open }) => (
+                            <>
+                              <Disclosure.Button
                                 className={classNames(
-                                  open
-                                    ? "text-gray-300 rotate-90"
-                                    : "text-gray-400 group-hover:text-gray-300",
-                                  "mr-2 flex-shrink-0 h-5 w-5 transform group-hover:text-gray-400 transition-colors ease-in-out duration-150"
+                                  item.current
+                                    ? "text-white"
+                                    : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                                  "group w-full flex items-center pr-2 py-2 text-left text-sm font-medium rounded-md"
                                 )}
-                                viewBox="0 0 20 20"
-                                aria-hidden="true"
                               >
-                                <path
-                                  d="M6 6L14 10L6 14V6Z"
-                                  fill="currentColor"
-                                />
-                              </svg>
-                              {item.name}
-                            </Disclosure.Button>
-                            <Disclosure.Panel className="space-y-1">
-                              {item.children.map((subItem) => (
-                                <Link
-                                  key={subItem.name}
-                                  to={subItem.href}
+                                <svg
                                   className={classNames(
-                                    subItem.current
-                                      ? "bg-gray-900 text-white"
-                                      : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                                    "group w-full flex items-center pl-10 pr-2 py-2 text-sm font-medium rounded-md text-gray-300"
+                                    open
+                                      ? "text-gray-300 rotate-90"
+                                      : "text-gray-400 group-hover:text-gray-300",
+                                    "mr-2 flex-shrink-0 h-5 w-5 transform group-hover:text-gray-400 transition-colors ease-in-out duration-150"
                                   )}
+                                  viewBox="0 0 20 20"
+                                  aria-hidden="true"
                                 >
-                                  {subItem.name}
-                                </Link>
-                              ))}
-                            </Disclosure.Panel>
-                          </>
-                        )}
-                      </Disclosure>
-                    )
-                  )}
+                                  <path
+                                    d="M6 6L14 10L6 14V6Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                                {item.name}
+                              </Disclosure.Button>
+                              <Disclosure.Panel className="space-y-1">
+                                {item.children.map((subItem) => (
+                                  <Link
+                                    key={subItem.name}
+                                    to={subItem.href}
+                                    className={classNames(
+                                      subItem.current
+                                        ? "bg-gray-900 text-white"
+                                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                                      "group w-full flex items-center pl-10 pr-2 py-2 text-sm font-medium rounded-md text-gray-300"
+                                    )}
+                                  >
+                                    {subItem.name}
+                                  </Link>
+                                ))}
+                              </Disclosure.Panel>
+                            </>
+                          )}
+                        </Disclosure>
+                      )
+                    )}
                 </nav>
                 <div className="grid grid-cols-1 px-4 pb-0">
                   <div className="m-1">
