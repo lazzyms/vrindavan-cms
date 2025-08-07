@@ -1,12 +1,17 @@
 import { Link } from "react-router-dom";
 import Breadcrumb from "../../Components/Breadcrumbs";
-import ErrorBoundary from "../../Components/ErrorBoundary";
-import { PlusCircleIcon } from "@heroicons/react/outline";
+import ErrorBoundry from "../../Components/ErrorBoundry";
+import {
+  PlusCircleIcon,
+  PencilIcon,
+  TrashIcon,
+} from "@heroicons/react/outline";
 import { useContext, useEffect, useState } from "react";
 import { deleteTestimonialById, getTestimonials } from "../../services";
-import { NotificationContext } from "../../Layout";
-import PortfolioCard from "../../Components/PortfolioCard";
-import ConfirmDialog from "../../Components/ConfirmDialog";
+import { NotificationContext, WindowWidthContext } from "../../Layout";
+import ConfirmDialogue from "../../Components/ConfirmDialouge";
+import { handleApiError } from "../../utils/errorHandler";
+import { getImageUrl } from "../../utils";
 
 const pages = [
   {
@@ -18,6 +23,7 @@ const pages = [
 
 const Testimonials = () => {
   const { setNotificationState } = useContext(NotificationContext);
+  const isMobile = useContext(WindowWidthContext);
 
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,16 +38,14 @@ const Testimonials = () => {
       })
       .catch((err) => {
         setLoading(false);
+        const errorMessage = handleApiError(err);
         setNotificationState({
           type: "error",
-          message:
-            err.response.status === 400
-              ? err.response.data.error.message
-              : err.message,
+          message: errorMessage,
           show: true,
         });
       });
-  }, []);
+  }, [setNotificationState]);
 
   const [catDeleteModal, setCatDeleteModal] = useState(false);
 
@@ -54,12 +58,10 @@ const Testimonials = () => {
         }
       })
       .catch((err) => {
+        const errorMessage = handleApiError(err);
         setNotificationState({
           type: "error",
-          message:
-            err.response.status === 400
-              ? err.response.data.error.message
-              : err.message,
+          message: errorMessage,
           show: true,
         });
       });
@@ -114,13 +116,36 @@ const Testimonials = () => {
           testimonials.length > 0 &&
           testimonials.map((feature) => (
             <div key={feature._id} className="pt-6">
-              <PortfolioCard
-                key={feature._id}
-                feature={feature}
-                handleDelete={handleDeleteModal}
-              />
-              <ErrorBoundary>
-                <ConfirmDialog
+              <div className="flow-root rounded-lg bg-gray-50 px-6 pb-8">
+                <div className="mt-6">
+                  <h3 className="mt-4 text-lg font-medium tracking-tight text-gray-900">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-1 text-base text-gray-500 h-20 text-clip overflow-hidden">
+                    {feature.description?.replaceAll('"', "")}
+                  </p>
+                  {feature.coverImage && (
+                    <img
+                      src={getImageUrl(feature.coverImage, isMobile)}
+                      className="mt-1 w-full h-36 rounded-xl object-scale-down"
+                      alt={feature._id}
+                    />
+                  )}
+                </div>
+                <div className="-my-6 flex items-center justify-center">
+                  <Link to={`/testimonials/edit/${feature._id}`}>
+                    <PencilIcon className="m-1 mt-8 p-2 text-gray-600 hover:text-gray-900 h-8 w-8 border rounded-full hover:shadow" />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteModal(feature._id)}
+                  >
+                    <TrashIcon className="m-1 mt-8 p-2 text-gray-600 hover:text-gray-900 h-8 w-8 border rounded-full hover:shadow" />
+                  </button>
+                </div>
+              </div>
+              <ErrorBoundry>
+                <ConfirmDialogue
                   id={feature._id}
                   open={catDeleteModal}
                   setOpen={(e) => setCatDeleteModal(e)}
@@ -128,7 +153,7 @@ const Testimonials = () => {
                   title={`Delete ${feature.title}`}
                   handleAction={(e) => handleDelete(e)}
                 />
-              </ErrorBoundary>
+              </ErrorBoundry>
             </div>
           ))
         )}

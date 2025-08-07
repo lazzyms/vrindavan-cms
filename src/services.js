@@ -341,3 +341,122 @@ export const deletePortfolioById = (id) => {
       });
   });
 };
+
+// Admin Management Services
+export const getAdmins = (params = {}) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`admin/admins`, { params })
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const createAdmin = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`admin/admins`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const updateAdmin = (id, data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .put(`admin/admins/${id}`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const removeAdmin = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`admin/admins/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const changePassword = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .put(`admin/change-password`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+// Testimonial Services
+export const getTestimonials = () => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`testimonials`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const getTestimonialById = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .get(`testimonials/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const addOrUpdateTestimonial = (data) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .post(`testimonials`, data)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};
+
+export const deleteTestimonialById = (id) => {
+  return new Promise((resolve, reject) => {
+    instance
+      .delete(`testimonials/${id}`)
+      .then((res) => {
+        resolve(res);
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+};

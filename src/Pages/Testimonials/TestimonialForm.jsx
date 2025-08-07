@@ -18,6 +18,7 @@ import { Switch } from "@headlessui/react";
 import { XCircleIcon } from "@heroicons/react/outline";
 import _ from "lodash";
 import MarkDownInput from "../../Components/MarkDownInput";
+import { handleApiError } from "../../utils/errorHandler";
 
 export default function TestimonialForm() {
   let { tid } = useParams();
@@ -47,12 +48,10 @@ export default function TestimonialForm() {
           }
         })
         .catch((err) => {
+          const errorMessage = handleApiError(err);
           setNotificationState({
             type: "error",
-            message:
-              err.response && err.response.status === 400
-                ? err.response.data.error.message
-                : err.message,
+            message: errorMessage,
             show: true,
           });
         });
@@ -155,12 +154,10 @@ export default function TestimonialForm() {
       .catch((err) => {
         // TODO remove images from cloudinary on error
         setLoading(false);
+        const errorMessage = handleApiError(err);
         setNotificationState({
           type: "error",
-          message:
-            err.response && err.response.status === 400
-              ? err.response.data.error.message
-              : err.message,
+          message: errorMessage,
           show: true,
         });
       });
