@@ -76,13 +76,12 @@ export default function Login() {
             )}
 
             <div className="flex items-center justify-start my-1 w-full">
-              {/* Prevent default refresh and delegate to react-hook-form */}
+              {/* Use react-hook-form handleSubmit which prevents default */}
               <form
                 id="login"
                 className="w-full p-4 bg-gray-800 rounded-xl"
-                onSubmit={() => {
-                  handleSubmit(onSubmit)();
-                }}
+                method="post"
+                onSubmit={handleSubmit(onSubmit)}
               >
                 <div className="flex items-center justify-start my-3 w-full">
                   <h1 className="text-white text-center text-2xl w-full">

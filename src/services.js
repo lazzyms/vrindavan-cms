@@ -1,7 +1,16 @@
 import axios from "axios";
 
+// Ensure API base URL is configured; otherwise Axios will call the app origin (undesired)
+const API_BASE_URL = process.env.REACT_APP_API;
+if (!API_BASE_URL) {
+  // This helps catch misconfiguration in development
+  console.error(
+    "REACT_APP_API is not set. API requests will default to the app origin. Set REACT_APP_API in .env and restart the dev server."
+  );
+}
+
 const instance = axios.create({
-  baseURL: process.env.REACT_APP_API,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,7 +25,7 @@ instance.interceptors.request.use(
     return config;
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
+    if (error?.response && error.response.status === 401) {
       localStorage.clear();
       window.location.href = "/login";
     }
@@ -29,7 +38,7 @@ instance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response.status === 401) {
+    if (error?.response?.status === 401) {
       localStorage.removeItem("token");
       window.location.href = "/login";
     }
@@ -39,8 +48,9 @@ instance.interceptors.response.use(
 
 export const login = (data) => {
   return new Promise((resolve, reject) => {
+    // Login should be a POST (not PUT) for most APIs
     instance
-      .put(`login`, data)
+      .post(`login`, data)
       .then((res) => {
         resolve(res);
       })
