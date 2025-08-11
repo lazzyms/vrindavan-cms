@@ -48,9 +48,8 @@ instance.interceptors.response.use(
 
 export const login = (data) => {
   return new Promise((resolve, reject) => {
-    // Login should be a POST (not PUT) for most APIs
     instance
-      .post(`login`, data)
+      .put(`login`, data)
       .then((res) => {
         resolve(res);
       })
